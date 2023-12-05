@@ -40,7 +40,7 @@ def main(opt):
                 files.append(os.path.join(root, filename))
     combined = []
     for f in files:
-        gpkg = cp.read_gpkg(f)
+        gpkg = cp.read_gpkg(f,row=None)
         print(len(gpkg))
         gpkg['filename'] = os.path.basename(f)
         polygons = gpkg
@@ -78,6 +78,6 @@ if __name__=='__main__':
 # below code is for trouble-shooting purposes only:
 # from types import SimpleNamespace
 # # Create an opt object with the desired attributes
-# opt = SimpleNamespace(input_path='data/polygons/alpin', output_path='geopackage', extent_size='1280', no_overlap=True)
+# opt = SimpleNamespace(input_path='data/polygons/boreal_east', output_path='geopackage', extent_size='1280', no_overlap=True)
 # # Use this opt object for testing
 # main(opt)
