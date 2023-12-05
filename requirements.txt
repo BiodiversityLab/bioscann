@@ -6,3 +6,5 @@ rtree==1.0.0
 sweref99==0.2
 tensorboard>=2.8.0
 tqdm==4.64.1
+ipython
+ipykernel

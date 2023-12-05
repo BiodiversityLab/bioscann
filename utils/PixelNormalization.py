@@ -56,7 +56,7 @@ def rescale_ditches(image_array):
     new_image_array = image_array
     return new_image_array
 
-def rescale_soil_depth(image_array):
+def rescale_peat_depth(image_array):
     min_value = 0
     max_value = 88
     new_image_array = min_max_scaler(image_array,min_value,max_value)

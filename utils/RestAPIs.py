@@ -134,7 +134,7 @@ def params_soil_moisture(coordinates_list, image_year='', rendering_rule='', ima
     )
     return params
 
-def params_soil_depth(coordinates_list, image_year='', rendering_rule='', image_size=512):
+def params_peat_depth(coordinates_list, image_year='', rendering_rule='', image_size=512):
     coordinates_string = str()
     params = dict(
         bbox='{},+{},+{},+{}'.format(coordinates_list[0], coordinates_list[1], coordinates_list[2], coordinates_list[3]),
@@ -349,7 +349,7 @@ apis = {
     "max_temp": {'params': standard_params, 'url': url_max_temp,'normalization': PN.rescale_max_temp},
     "sum_temp": {'params': standard_params, 'url': url_sum_temp,'normalization': PN.rescale_sum_temp},
     "ditches": {'params': standard_params, 'url': url_ditches,'normalization': PN.rescale_ditches},
-    "soil_depth": {'params': params_soil_depth, 'url': url_soildata,'normalization': PN.rescale_soil_depth},
+    "peat_depth": {'params': params_peat_depth, 'url': url_soildata,'normalization': PN.rescale_peat_depth},
     "soil_type": {'params': params_soil_type, 'url': url_soildata,'normalization': PN.rescale_soil_type},
     "biomass": {'params': params_biomass, 'url': url_basic_forest_attributes,'normalization': PN.rescale_biomass},
     "leaves_present": {'params': params_leaves_present, 'url': url_basic_forest_attributes,'normalization': PN.rescale_leaves_present},
