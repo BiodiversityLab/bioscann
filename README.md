@@ -14,3 +14,11 @@ python -m pip install .
 cd ../..
 pip install -r requirements.txt
 ```
+
+## Prepare the polygon data for input
+```commandline
+python crop_windows_from_polygons.py \
+    --input_path data/polygons/alpin \
+    --output_path data/cropped_windows/alpin_windows \
+    --no_overlap
+```

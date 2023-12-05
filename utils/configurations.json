@@ -1,0 +1,633 @@
+{
+    "version_1_coniferous": {
+        "apis": [
+            "nationellhojdmodell_2_0",
+            "tradhojd_3_1",
+            "skogligagrunddata_dev_3_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        121,
+                        122,
+                        123,
+                        124
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "version_1"
+    },
+    "version_1_coniferous_snic": {
+        "apis": [
+            "nationellhojdmodell_2_0",
+            "tradhojd_3_2",
+            "skogligagrunddata_2_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        121,
+                        122,
+                        123,
+                        124
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "version_1"
+    },
+    "version_1_all_forest": {
+        "apis": [
+            "nationellhojdmodell_2_0",
+            "tradhojd_3_1",
+            "skogligagrunddata_dev_3_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        115,
+                        116,
+                        117,
+                        121,
+                        122,
+                        123,
+                        124,
+                        125,
+                        126,
+                        127
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "version_1"
+    },
+    "version_1_all_forest_snic": {
+        "apis": [
+            "nationellhojdmodell_2_0",
+            "tradhojd_3_2",
+            "skogligagrunddata_2_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        115,
+                        116,
+                        117,
+                        121,
+                        122,
+                        123,
+                        124,
+                        125,
+                        126,
+                        127
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "version_1"
+    },
+    "version_1_deciduous": {
+        "apis": [
+            "nationellhojdmodell_2_0",
+            "tradhojd_3_1",
+            "skogligagrunddata_dev_3_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        114,
+                        115,
+                        116,
+                        117,
+                        124,
+                        125,
+                        126,
+                        127
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "version_1"
+    },
+    "version_1_deciduous_snic": {
+        "apis": [
+            "nationellhojdmodell_2_0",
+            "tradhojd_3_2",
+            "skogligagrunddata_2_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        114,
+                        115,
+                        116,
+                        117,
+                        124,
+                        125,
+                        126,
+                        127
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "version_1"
+    },
+    "forest_detection_1970": {
+        "apis": [
+            "ortofoto_1_1_1970"
+        ],
+        "prediction_masks": [],
+        "polygon_filtering_method": "forest_detection_1970"
+    },
+    "forest_detection_1970_compute_cluster": {
+        "apis": [
+            "ortofoto_1_1_1970_compute_cluster"
+        ],
+        "prediction_masks": [],
+        "polygon_filtering_method": "forest_detection_1970"
+    },
+    "version_2_coniferous": {
+        "apis": [
+            "skogligagrunddata_3_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0",
+            "tillvaxt",
+            "avstand_vagar_1_0",
+            "avstanddiken_1_0",
+            "avstandkolgruvbrukomr_1_0",
+            "nationellhojdmodell_2_0_ra",
+            "nationellhojdmodell_2_0_3band",
+            "skog_historiskaorto_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        121,
+                        122,
+                        123,
+                        124
+                    ]
+                ],
+                "mask_values_exclude": []
+            },
+            {
+                "api": "tillvaxt",
+                "channels": [
+                    0
+                ],
+                "mask_values": [],
+                "mask_values_exclude": [
+                    [
+                        -32768
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
+    "version_2_deciduous": {
+        "apis": [
+            "skogligagrunddata_3_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0",
+            "tillvaxt",
+            "avstand_vagar_1_0",
+            "avstanddiken_1_0",
+            "avstandkolgruvbrukomr_1_0",
+            "nationellhojdmodell_2_0_ra",
+            "nationellhojdmodell_2_0_3band",
+            "skog_historiskaorto_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        114,
+                        115,
+                        116,
+                        117,
+                        124,
+                        125,
+                        126,
+                        127
+                    ]
+                ],
+                "mask_values_exclude": []
+            },
+            {
+                "api": "tillvaxt",
+                "channels": [
+                    0
+                ],
+                "mask_values": [],
+                "mask_values_exclude": [
+                    [
+                        -32768
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
+    "version_2_all_forest": {
+        "apis": [
+            "skogligagrunddata_3_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0",
+            "tillvaxt",
+            "avstand_vagar_1_0",
+            "avstanddiken_1_0",
+            "avstandkolgruvbrukomr_1_0",
+            "nationellhojdmodell_2_0_ra",
+            "nationellhojdmodell_2_0_3band",
+            "skog_historiskaorto_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        115,
+                        116,
+                        117,
+                        121,
+                        122,
+                        123,
+                        124,
+                        125,
+                        126,
+                        127
+                    ]
+                ],
+                "mask_values_exclude": []
+            },
+            {
+                "api": "tillvaxt",
+                "channels": [
+                    0
+                ],
+                "mask_values": [],
+                "mask_values_exclude": [
+                    [
+                        -32768
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
+    "version_2_coniferous_no_tillvaxt": {
+        "apis": [
+            "skogligagrunddata_3_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0",
+            "avstand_vagar_1_0",
+            "avstanddiken_1_0",
+            "avstandkolgruvbrukomr_1_0",
+            "nationellhojdmodell_2_0_ra",
+            "nationellhojdmodell_2_0_3band",
+            "skog_historiskaorto_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        121,
+                        122,
+                        123,
+                        124
+                    ]
+                ],
+                "mask_values_exclude": []
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
+    "version_2_deciduous_no_tillvaxt": {
+        "apis": [
+            "skogligagrunddata_3_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0",
+            "avstand_vagar_1_0",
+            "avstanddiken_1_0",
+            "avstandkolgruvbrukomr_1_0",
+            "nationellhojdmodell_2_0_ra",
+            "nationellhojdmodell_2_0_3band",
+            "skog_historiskaorto_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        114,
+                        115,
+                        116,
+                        117,
+                        124,
+                        125,
+                        126,
+                        127
+                    ]
+                ],
+                "mask_values_exclude": []
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
+    "version_2_all_forest_no_tillvaxt": {
+        "apis": [
+            "skogligagrunddata_3_0",
+            "markfuktighet_slu_2_0_KON",
+            "tradslag_1_0",
+            "avstand_vagar_1_0",
+            "avstanddiken_1_0",
+            "avstandkolgruvbrukomr_1_0",
+            "nationellhojdmodell_2_0_ra",
+            "nationellhojdmodell_2_0_3band",
+            "skog_historiskaorto_1_0"
+        ],
+        "prediction_masks": [
+            {
+                "api": "marktackedata_2_0",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        115,
+                        116,
+                        117,
+                        121,
+                        122,
+                        123,
+                        124,
+                        125,
+                        126,
+                        127
+                    ]
+                ],
+                "mask_values_exclude": []
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
+    "version_public": {
+        "apis": [
+            "treeheight",
+            "soil_moisture",
+            "elevation_gradient",
+            "max_temp",
+            "sum_temp",
+            "ditches",
+            "soil_depth",
+            "soil_type",
+            "biomass",
+            "leaves_present"
+        ],
+        "prediction_masks": [
+            {
+                "api": "land_cover_types",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        115,
+                        116,
+                        117,
+                        118,
+                        121,
+                        122,
+                        123,
+                        124,
+                        125,
+                        126,
+                        127,
+                        128
+                    ]
+                ],
+                "mask_values_exclude": []
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
+    "version_public_sat": {
+        "apis": [
+            "treeheight",
+            "soil_moisture",
+            "elevation_gradient",
+            "max_temp",
+            "sum_temp",
+            "ditches",
+            "soil_depth",
+            "soil_type",
+            "biomass",
+            "leaves_present",
+            "satellite"
+        ],
+        "prediction_masks": [
+            {
+                "api": "land_cover_types",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        115,
+                        116,
+                        117,
+                        118,
+                        121,
+                        122,
+                        123,
+                        124,
+                        125,
+                        126,
+                        127,
+                        128
+                    ]
+                ],
+                "mask_values_exclude": []
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
+    "version_public_sks_gee": {
+        "apis": [
+            "treeheight",
+            "soil_moisture",
+            "elevation_gradient",
+            "max_temp",
+            "sum_temp",
+            "ditches",
+            "soil_depth",
+            "soil_type",
+            "biomass",
+            "leaves_present",
+            "era5_bioclim",
+            "s2_monthly",
+            "hii",
+            "elevation_dem"
+        ],
+        "prediction_masks": [
+            {
+                "api": "land_cover_types",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        115,
+                        116,
+                        117,
+                        118,
+                        121,
+                        122,
+                        123,
+                        124,
+                        125,
+                        126,
+                        127,
+                        128
+                    ]
+                ],
+                "mask_values_exclude": []
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
+    "template": {
+        "apis": [
+            "selection of ",
+            "datalayer to feed as input data to AI model",
+            "available apis can be found in RestAPIs.py"
+        ],
+        "prediction_masks": [
+            {
+                "api": "data layer in which to select areas for the AI model to be trained on",
+                "channels": [
+                    "selection of channels to use",
+                    "channel 2 example"
+                ],
+                "masks_vaues": [
+                    [
+                        "for each channel selected, decide what pixel values to be the bypass mask"
+                    ],
+                    [
+                        10,
+                        13,
+                        15
+                    ]
+                ]
+            }
+        ],
+        "polygon_filtering_method": "name of method in utils/PolygonFilters.py"
+    }
+}
