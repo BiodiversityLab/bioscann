@@ -79,5 +79,3 @@ if __name__=='__main__':
 # from types import SimpleNamespace
 # # Create an opt object with the desired attributes
 # opt = SimpleNamespace(input_path='data/polygons/boreal_east', output_path='geopackage', extent_size='1280', no_overlap=True)
-# # Use this opt object for testing
-# main(opt)

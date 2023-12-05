@@ -60,13 +60,14 @@ python crop_windows_from_polygons.py \
 #### Alpine
 ```commandline
 python extract_geo_data.py \
-    --output_path datasets/testdata_2_geodata  \
+    --output_path data/processed_geodata/alpine/alpine_geodata  \
     --window_coordinates data/processed_geodata/alpine/cropped_windows \
-    --configuration version_public \
+    --configuration version_public_sat \
     --test_config version_1 \
     --testset_size 0.2 \
     --img-size 128 \
     --username uppun_user \
     --password 4sjHa2YQ \
-    --logging_off
+    --logging_off \
+    --threads 30
 ```

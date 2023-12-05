@@ -28,7 +28,6 @@ import pdb
 import logging
 import re
 import concurrent.futures
-import urllib
 
 logging.basicConfig(level='INFO')
 log = logging.getLogger()
@@ -198,13 +197,6 @@ def main(opt):
     selected_apis = []
     selected_test_apis = []
 
-    # authenticate on the target server
-    password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-    target_server = opt.target_server
-    password_mgr.add_password(None, target_server, opt.username, opt.password)
-    handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
-    opener = urllib.request.build_opener(handler)
-    urllib.request.install_opener(opener)
 
     log.info('Using config' + opt.configuration)
     with open('utils/configurations.json',encoding='utf-8') as f:
@@ -253,11 +245,12 @@ def main(opt):
             selected_test_apis.append(api)
 
         extents = glob.glob(os.path.join(opt.window_coordinates, "[!original_]*.gpkg"))
+        # Filter out filenames ending with 'combined.gpkg' or 'combined_coarse.gpkg'
+        extents = [f for f in extents if not f.endswith(('combined.gpkg', 'combined_coarse.gpkg'))]
         def sort_key(name):
             base = name.split('_')[-1]
             num = re.sub(r'\D', '', base)
             return int(num) if num.isdigit() else base
-
         extents.sort(key=sort_key)
         # Create info file describing the channels of the feature data
         save_apis_channel_data(extents[0], selected_apis, int(opt.meters_per_pixel), opt.output_path)
@@ -346,13 +339,12 @@ if __name__=='__main__':
     parser.add_argument('--img-size', type=int, default=256)
     parser.add_argument('--output_path', action='store', default='datasets')
     parser.add_argument('--start_index', action='store', type=int, default=5)
-    parser.add_argument('--filter_on_marktackedata_2_0', nargs='+', default=[])
     parser.add_argument('--testset_size', action='store', type=float, default=0.1)
     parser.add_argument('--validation_size', action='store', type=float, default=0.2)
     parser.add_argument('--test_area', nargs='*',type=int, default=[389000,6752000,389000,6757000])
     parser.add_argument('--configuration', action='store', default='')
     parser.add_argument('--window_coordinates', action='store', default='')
-    parser.add_argument('--polygons_path', action='store', default='geopackge')
+    parser.add_argument('--polygons_path', action='store', default='geopackage')
     parser.add_argument('--lonlat_features',action='store_true')
     parser.add_argument('--meters_per_pixel', action='store', default=10)
     parser.add_argument('--test_configuration', action='store', default='')
@@ -365,3 +357,30 @@ if __name__=='__main__':
     opt = parser.parse_args()
 
     main(opt)
+
+
+# below code is for trouble-shooting purposes only:
+# from types import SimpleNamespace
+#
+# opt = SimpleNamespace(
+#     polygon_ids=[],
+#     number_of_polygons=0,
+#     img_size=128,
+#     output_path="data/processed_geodata/alpine/alpine_geodata",
+#     start_index=5,
+#     testset_size=0.2,
+#     validation_size=0.2,
+#     test_area=[389000, 6752000, 389000, 6757000],
+#     configuration="version_public_sat",
+#     window_coordinates="data/processed_geodata/alpine/cropped_windows",
+#     polygons_path='geopackage',
+#     lonlat_features=False,
+#     meters_per_pixel=10,
+#     test_configuration="version_1",
+#     threads=30,
+#     ai_image_server=False,
+#     logging_off=True,
+#     target_server='https://geodata.skogsstyrelsen.se/arcgis/rest/',
+#     username='uppun_user',
+#     password='4sjHa2YQ'
+# )
