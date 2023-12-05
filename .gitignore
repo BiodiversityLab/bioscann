@@ -163,6 +163,7 @@ cython_debug/
 .DS_Store
 # exclude all non_public files
 non_public/
+processed_geodata/
 # exclude the qgis temporary output files
 *-shm
 *-wal

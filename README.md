@@ -15,7 +15,7 @@ cd ../..
 pip install -r requirements.txt
 ```
 
-## Prepare the polygon data for input
+## Define cropping window around each polygon
 #### Alpine
 ```commandline
 python crop_windows_from_polygons.py \
@@ -54,4 +54,19 @@ python crop_windows_from_polygons.py \
     --input_path data/polygons/continental \
     --output_path data/processed_geodata/continental/cropped_windows \
     --no_overlap
+```
+
+## Extract spatial data for each cropping window
+#### Alpine
+```commandline
+python extract_geo_data.py \
+    --output_path datasets/testdata_2_geodata  \
+    --window_coordinates data/processed_geodata/alpine/cropped_windows \
+    --configuration version_public \
+    --test_config version_1 \
+    --testset_size 0.2 \
+    --img-size 128 \
+    --username uppun_user \
+    --password 4sjHa2YQ \
+    --logging_off
 ```
