@@ -125,14 +125,15 @@ def do_work(extent_name,json_data,opt,train_annotation_path,testset_instances_di
     original_polygons = cp.read_gpkg(original_polygons_name)
     original_polygons = pf.configurations[json_data[opt.configuration]['polygon_filtering_method']]['indata_filtering'](original_polygons,'all')
     # select random subset of polygons for test set
+    n_instances_test = int(np.round(len(polygon_ids)*opt.testset_size))
+    n_instances_validation = int(np.round(len(polygon_ids)*opt.validation_size))
     if opt.testset_size > 0:
-        selected_test_ids = np.random.choice(polygon_ids.index.values,int(np.round(len(polygon_ids)*opt.testset_size)), replace=False)
+        selected_test_ids = np.random.choice(polygon_ids.index.values,n_instances_test, replace=False)
     else:
         selected_test_ids = []
     if opt.validation_size > 0:
         left_over_polygons = polygon_ids.index.delete(selected_test_ids)
-
-        selected_validation_ids = np.random.choice(left_over_polygons, int(np.round(len(left_over_polygons)*opt.validation_size)), replace=False)
+        selected_validation_ids = np.random.choice(left_over_polygons, n_instances_validation, replace=False)
     
     testset = polygon_ids.iloc[selected_test_ids]
     a=testset.index.values

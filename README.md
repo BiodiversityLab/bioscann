@@ -59,9 +59,74 @@ python crop_windows_from_polygons.py \
 ## Extract spatial data for each cropping window
 #### Alpine
 ```commandline
+region="alpine"
 python extract_geo_data.py \
-    --output_path data/processed_geodata/alpine/alpine_geodata  \
-    --window_coordinates data/processed_geodata/alpine/cropped_windows \
+    --output_path data/processed_geodata/${region}/${region}_geodata  \
+    --window_coordinates data/processed_geodata/${region}/cropped_windows \
+    --configuration version_public_sat \
+    --test_config version_1 \
+    --testset_size 0.2 \
+    --img-size 128 \
+    --username uppun_user \
+    --password 4sjHa2YQ \
+    --logging_off \
+    --threads 30
+```
+
+#### Boreal_east
+```commandline
+region="boreal_east"
+python extract_geo_data.py \
+    --output_path data/processed_geodata/${region}/${region}_geodata  \
+    --window_coordinates data/processed_geodata/${region}/cropped_windows \
+    --configuration version_public_sat \
+    --test_config version_1 \
+    --testset_size 0.2 \
+    --img-size 128 \
+    --username uppun_user \
+    --password 4sjHa2YQ \
+    --logging_off \
+    --threads 30
+```
+
+#### Boreal_northwest
+```commandline
+region="boreal_northwest"
+python extract_geo_data.py \
+    --output_path data/processed_geodata/${region}/${region}_geodata  \
+    --window_coordinates data/processed_geodata/${region}/cropped_windows \
+    --configuration version_public_sat \
+    --test_config version_1 \
+    --testset_size 0.2 \
+    --img-size 128 \
+    --username uppun_user \
+    --password 4sjHa2YQ \
+    --logging_off \
+    --threads 30
+```
+
+#### Boreal_south
+```commandline
+region="boreal_south"
+python extract_geo_data.py \
+    --output_path data/processed_geodata/${region}/${region}_geodata  \
+    --window_coordinates data/processed_geodata/${region}/cropped_windows \
+    --configuration version_public_sat \
+    --test_config version_1 \
+    --testset_size 0.2 \
+    --img-size 128 \
+    --username uppun_user \
+    --password 4sjHa2YQ \
+    --logging_off \
+    --threads 30
+```
+
+#### Continental
+```commandline
+region="continental"
+python extract_geo_data.py \
+    --output_path data/processed_geodata/${region}/${region}_geodata  \
+    --window_coordinates data/processed_geodata/${region}/cropped_windows \
     --configuration version_public_sat \
     --test_config version_1 \
     --testset_size 0.2 \
