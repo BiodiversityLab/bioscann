@@ -382,6 +382,6 @@ if __name__=='__main__':
 #     ai_image_server=False,
 #     logging_off=True,
 #     target_server='https://geodata.skogsstyrelsen.se/arcgis/rest/',
-#     username='uppun_user',
-#     password='4sjHa2YQ'
+#     username='xxxx',
+#     password='xxxx'
 # )
