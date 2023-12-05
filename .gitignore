@@ -159,4 +159,10 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# exclude all mac-inserted settings files
 .DS_Store
+# exclude all non_public files
+non_public/
+# exclude the qgis temporary output files
+*-shm
+*-wal
