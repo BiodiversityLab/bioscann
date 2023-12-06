@@ -320,7 +320,7 @@ class AttentionPixelClassifierFlex(nn.Module):
         self.n_channels_per_layer = np.array(n_channels_per_layer)
 
         if not len(self.n_channels_per_layer) % 2 == 1:
-            print('Warning: Channel counts must be specified for an uneven number of layers. The provided array',self.n_channels_per_layer, 'is uneven, therefore last provided value is being ignored.')
+            print('Warning: Channel counts must be specified for an uneven number of layers. The provided array',self.n_channels_per_layer, 'is even, therefore last provided value is being ignored.')
             self.n_channels_per_layer = self.n_channels_per_layer[:-1]
         self.n_layers_half = (len(self.n_channels_per_layer)+1)//2
         if n_coefficients_per_upsampling_layer == None:
