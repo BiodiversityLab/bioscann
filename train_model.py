@@ -17,7 +17,7 @@ from torch import nn
 
 import utils.AttentionPixelClassifier as attentionPixelClassifier
 import utils.Dataloader as dataloader
-import test as test
+import test_model as test
 
 torch.cuda.empty_cache()
 
@@ -524,3 +524,36 @@ if __name__ == "__main__":
 
     if opt.mlflow:
         mlflow.end_run()
+
+
+# below code is for trouble-shooting purposes only
+# from types import SimpleNamespace
+#
+# # Replace 'example_region' and 'example_configuration' with actual values
+# region = 'alpine'
+# configuration = '22,33,44,55,44,33,22'
+#
+# opt = SimpleNamespace(
+#     epochs=100,
+#     batch_size=14,
+#     img_size=[128],
+#     dataset=f"data/processed_geodata/{region}/{region}_geodata",
+#     validation=f"data/processed_geodata/{region}/{region}_geodata/validation",
+#     input_channels=[11],  # Assuming '11' is the correct value
+#     output_channels=1,
+#     experiment_name=f"{region}_flex_{configuration}",
+#     weights="",
+#     plot=True,
+#     mlflow=False,
+#     learning_rate=0.0008,
+#     device="gpu",
+#     algorithm="AttentionPixelClassifierFlex",
+#     no_loss_mask=False,
+#     test_dataset=f"data/processed_geodata/{region}/{region}_geodata/testset/",
+#     pfi=True,
+#     target_img_name="",
+#     workdir="/Users/toban562/Projects/bioscann",
+#     n_channels_per_layer=configuration,  # Replace with actual configuration
+#     n_coefficients_per_upsampling_layer=None
+# )
+
