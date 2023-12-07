@@ -35,6 +35,10 @@ def mask_pred(pred, mask):
     return res
 
 
+def f1_score(precision, recall):
+    return 2 * (precision * recall) / (precision + recall) if (precision + recall) != 0 else 0
+
+
 def main(opt):
     experiment_path = os.path.join(opt.workdir, "train", opt.experiment_name)
     print('Training results will be stored at', experiment_path)
@@ -138,6 +142,8 @@ def main(opt):
     optimizer = optim.Adam(model.parameters(), lr=opt.learning_rate, betas=(0.5, 0.999))
 
     best_score = 0
+    no_improve_epoch = 0
+    patience = 20
     # pdb.set_trace()
     for epoch in range(opt.epochs):
         # torch.enable_grad()
@@ -261,10 +267,21 @@ def main(opt):
                     val_img_index = np.where(np.array(batch["image_name"]) == target_img_name)[0].__int__()
                     output_val_image(val_pred,val_mask,val_x,val_y,experiment_path,epoch,val_image_names,val_img_index)
 
-        current_score = (val_binary_accuracy/mDataloader.val_dataloader.__len__() +
-                         val_binary_precision/mDataloader.val_dataloader.__len__() +
-                         val_binary_recall/mDataloader.val_dataloader.__len__() -
-                         val_loss/mDataloader.val_dataloader.__len__())
+
+        max_loss_value = 0.05 # scale loss to also be roughly between 0 and 1 as all other metrics
+        scaled_val_loss = val_loss / max_loss_value
+        # Calculate F1 score
+        val_f1 = f1_score(val_binary_precision/mDataloader.val_dataloader.__len__(), val_binary_recall/mDataloader.val_dataloader.__len__())
+        # Update the scoring formula to include F1
+        current_score = val_binary_accuracy/mDataloader.val_dataloader.__len__() \
+                        + val_f1 \
+                        - scaled_val_loss
+        # current_score = (val_binary_accuracy/mDataloader.val_dataloader.__len__() +
+        #                  val_binary_precision/mDataloader.val_dataloader.__len__() +
+        #                  val_binary_recall/mDataloader.val_dataloader.__len__() -
+        #                  scaled_val_loss/mDataloader.val_dataloader.__len__())
+
+
         if opt.mlflow:
             mlflow.log_metric(
                 "train_loss", float(train_loss) / mDataloader.train_dataloader.__len__(), step=epoch
@@ -310,6 +327,8 @@ def main(opt):
         )
         if current_score > best_score:
             best_score = current_score
+            no_improve_epoch = 0
+            # Save the best model
             torch.save(
                 model.state_dict(), os.path.join(experiment_path, "best_model.pth")
             )
@@ -317,6 +336,8 @@ def main(opt):
                 mlflow.log_artifact(
                     os.path.join(experiment_path, "best_model.pth"), "weights"
                 )
+        else:
+            no_improve_epoch += 1
 
         if epoch != 0 and epoch % 100 == 0:
             torch.save(
@@ -332,6 +353,10 @@ def main(opt):
                     ),
                     "weights",
                 )
+        if no_improve_epoch > patience:
+            print(f"Stopping early at epoch {epoch} due to no improvement.")
+            break
+
 
     torch.save(model.state_dict(), os.path.join(experiment_path, "model.pth"))
     if opt.mlflow:

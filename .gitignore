@@ -167,3 +167,6 @@ processed_geodata/
 # exclude the qgis temporary output files
 *-shm
 *-wal
+# exclude output of training
+mlruns/
+train/
