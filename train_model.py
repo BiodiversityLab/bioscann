@@ -143,7 +143,10 @@ def main(opt):
 
     best_score = 0
     no_improve_epoch = 0
-    patience = 20
+    if opt.patience == None:
+        patience = opt.epochs
+    else:
+        patience = opt.patience
     # pdb.set_trace()
     for epoch in range(opt.epochs):
         # torch.enable_grad()
@@ -268,7 +271,7 @@ def main(opt):
                     output_val_image(val_pred,val_mask,val_x,val_y,experiment_path,epoch,val_image_names,val_img_index)
 
 
-        max_loss_value = 0.05 # scale loss to also be roughly between 0 and 1 as all other metrics
+        max_loss_value = 0.1 # scale loss to also be roughly between 0 and 1 as all other metrics
         scaled_val_loss = val_loss / max_loss_value
         # Calculate F1 score
         val_f1 = f1_score(val_binary_precision/mDataloader.val_dataloader.__len__(), val_binary_recall/mDataloader.val_dataloader.__len__())
@@ -521,7 +524,7 @@ if __name__ == "__main__":
     parser.add_argument("--workdir", action="store", default="./")
     parser.add_argument("--n_channels_per_layer", action="store", default="10,8,6,4,2", help='ex: 10,8,6,4,2')
     parser.add_argument("--n_coefficients_per_upsampling_layer", action="store", default=None, help='ex: 4,4    Note: Must be the correct number of values corresponding to the upsampling layers, i.e. N_values = (len(n_channels_per_layer)/2) - 1')
-
+    parser.add_argument('--patience', type=int, default=None, help='Patience for early stopping (number of epochs to wait without improvement)')
     opt = parser.parse_args()
 
     if opt.mlflow:
