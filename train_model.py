@@ -524,7 +524,7 @@ if __name__ == "__main__":
     parser.add_argument("--workdir", action="store", default="./")
     parser.add_argument("--n_channels_per_layer", action="store", default="10,8,6,4,2", help='ex: 10,8,6,4,2')
     parser.add_argument("--n_coefficients_per_upsampling_layer", action="store", default=None, help='ex: 4,4    Note: Must be the correct number of values corresponding to the upsampling layers, i.e. N_values = (len(n_channels_per_layer)/2) - 1')
-    parser.add_argument('--patience', type=int, default=None, help='Patience for early stopping (number of epochs to wait without improvement)')
+    parser.add_argument("--patience", type=int, default=None, help="Patience for early stopping (number of epochs to wait without improvement)")
     opt = parser.parse_args()
 
     if opt.mlflow:
