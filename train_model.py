@@ -39,6 +39,229 @@ def f1_score(precision, recall):
     return 2 * (precision * recall) / (precision + recall) if (precision + recall) != 0 else 0
 
 
+
+
+def output_val_image(val_pred,val_mask,val_x,val_y,experiment_path,epoch,val_image_names,val_img_index):
+    # image_path = plot_pred(pred, y,experiment_path,str(epoch), image_names[0])
+    # plot val:
+    image_path = plot_pred(
+        val_pred,
+        val_mask,
+        val_y,
+        experiment_path,
+        str(epoch),
+        val_image_names,
+        val_img_index
+    )
+    #print(image_path)
+    # if epoch == 0:
+    #     images_paths = plot_training_images(val_x.cpu().detach().numpy(), experiment_path)
+    #     if opt.mlflow:
+    #         for train_batch_image_path in images_paths:
+    #             mlflow.log_artifact(train_batch_image_path, "images")
+    if opt.mlflow:
+        mlflow.log_artifact(image_path, "images")
+
+
+def calculate_precision_recall_with_confidence(
+    annotations: np.array, predictions: np.array
+) -> tuple:
+    """Calculate precision and recall of predictions with regard to the annotations."""
+    # Get true positives by masking away all annotated negatives and summing the rest
+    true_positives = (predictions * annotations).sum()
+
+    # Invert the vector by setting all 1s to 0, and all 0s to 1
+    inverse_annotations = annotations * (-1) + 1
+    # Get false positives by masking with the inverse of the annotations and summing the rest
+    false_positives = (predictions * inverse_annotations).sum()
+
+    # Get false negatives by taking the difference between the predictions and 1, while masking away all annotated negatives
+    false_negatives = ((1 - predictions) * annotations).sum()
+
+    # Calculate precision, if we have no predicted positives, set precision to 0
+    if (true_positives + false_positives) == 0:
+        precision = 0.0
+    else:
+        precision = true_positives / (true_positives + false_positives)
+
+    # Calculate recall, if we have no true positives or false negatives, set recall to 0
+    if (true_positives + false_negatives) == 0:
+        recall = 0.0
+    else:
+        recall = true_positives / (true_positives + false_negatives)
+
+    return precision, recall
+
+
+
+def plot_arrays(mask):
+    num_channels = mask.shape[0]
+    if num_channels > 1000 or num_channels < 1:
+        raise ValueError("Number of channels must be between 1 and 1000.")
+    # Calculate the number of rows and columns for subplots
+    num_cols = int(math.ceil(math.sqrt(num_channels)))
+    num_rows = int(math.ceil(num_channels / num_cols))
+    # Set up the plot
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(num_cols * 3, num_rows * 3))
+    # In case of a single subplot, wrap axes in a list for consistent indexing
+    if num_channels == 1:
+        axes = [axes]
+    # Plot each channel
+    for i in range(num_channels):
+        row, col = divmod(i, num_cols)
+        ax = axes[row][col] if num_channels > 1 else axes[row]
+        ax.imshow(mask[i, 0], cmap='gray', vmin=0, vmax=1)
+        ax.axis('off')
+        ax.set_title(f'Channel {i + 1}')
+    # Hide unused subplots
+    for i in range(num_channels, num_rows * num_cols):
+        row, col = divmod(i, num_cols)
+        axes[row][col].axis('off')
+    plt.tight_layout()
+    plt.show()
+
+def calculate_binary_precision_recall_new(annotations: np.array, predictions: np.array, mask: np.array) -> tuple:
+    """Calculate binary precision by rounding the predicitons to 0 or 1 before calculation."""
+
+    if annotations.shape != predictions.shape:
+        raise ValueError("Predicted and actual tensors must have the same shape.")
+    # plot_arrays(mask)
+    # plot_arrays(annotations)
+    # plot_arrays(predictions)
+    target_pixels = np.where(mask > 0)
+
+    # round the predictions to be binary
+    rounded_predictions = np.round(predictions)
+    # plot_arrays(rounded_predictions)
+
+    # Identify target pixels
+    target_pixels = mask > 0
+
+    # Flatten the tensors and apply the mask
+    preds_flat = rounded_predictions.flatten()
+    actuals_flat = annotations.flatten()
+    target_pixels_flat = target_pixels.flatten()
+
+    # Apply the mask to select only the target pixels
+    preds_target = preds_flat[target_pixels_flat]
+    actuals_target = actuals_flat[target_pixels_flat]
+
+    # Calculate accuracy for target pixels
+    correct_predictions = (preds_target == actuals_target).sum()
+    total_target_predictions = preds_target.size
+
+    if total_target_predictions == 0:
+        raise ValueError("No target pixels found in the mask.")
+
+    accuracy = correct_predictions / total_target_predictions
+
+
+
+def calculate_binary_precision_recall(annotations: np.array, predictions: np.array, mask:np.array) -> tuple:
+    """Calculate binary precision by rounding the predictions to 0 or 1 before calculation."""
+    if annotations.shape != predictions.shape:
+        raise ValueError("Predicted and actual tensors must have the same shape.")
+    # plot_arrays(mask)
+    # plot_arrays(annotations)
+    # plot_arrays(predictions)
+    target_pixels = np.where(mask > 0)
+
+    #
+    # # how many pixels are there
+    # rounded_predictions[target_pixels].shape[0]
+    # # how many pixels are supposed to be 1
+    # (annotations[target_pixels] == 1).sum()
+    # # how many pixels are supposed to be 0
+    # (annotations[target_pixels] == 0).sum()
+    # # how many pixels were predicted as 1
+    # (rounded_predictions[target_pixels] == 1).sum()
+    # # how many pixels were predicted as 0
+    # (rounded_predictions[target_pixels] == 0).sum()
+    #
+    #
+    #
+    # rounded_predictions[target_pixels].shape
+    # (rounded_predictions[target_pixels] == 1).sum()
+    # (annotations[target_pixels]==0).sum()
+    # (annotations[target_pixels]==1).sum()
+    # (rounded_predictions[target_pixels] == 1).sum()
+
+
+    # round the predictions to be binary
+    rounded_predictions = np.round(predictions)
+    # plot_arrays(rounded_predictions)
+
+    true_positives = ((rounded_predictions[target_pixels] == 1) & (annotations[target_pixels] == 1)).sum()
+    false_positives = ((rounded_predictions[target_pixels] == 1) & (annotations[target_pixels] == 0)).sum()
+    false_negatives = ((rounded_predictions[target_pixels] == 0) & (annotations[target_pixels] == 1)).sum()
+
+    false_pixels = abs(annotations[target_pixels]-rounded_predictions[target_pixels]).sum()
+    total_pixels = len(annotations[target_pixels])
+    correct_pixels = total_pixels-false_pixels
+    accuracy = correct_pixels/total_pixels
+
+    # Calculate precision, if we have no predicted positives, set precision to 0
+    if (true_positives + false_positives) == 0:
+        precision = 0.0
+    else:
+        precision = true_positives / (true_positives + false_positives)
+
+    # Calculate recall, if we have no true positives or false negatives, set recall to 0
+    if (true_positives + false_negatives) == 0:
+        recall = 0.0
+    else:
+        recall = true_positives / (true_positives + false_negatives)
+    return precision, recall, accuracy
+
+
+def plot_training_images(images, path):
+    #pdb.set_trace()
+   # number_of_images = images.shape[0]
+    images_paths = []
+    for index, image in enumerate(images):
+        if index >= 4:
+            break
+        #only keep first 3 channels
+        image2 = image[:3].transpose((1, 2, 0))
+        image2 *= 255
+        image_path = path+"/train_image_{}.png".format(index)
+        images_paths.append(image_path)
+        cv2.imwrite(image_path, image2)
+    return images_paths
+
+
+def plot_pred(pred, val_mask, y, store_path, epoch, image_name, val_img_index):
+    if val_mask != '':
+        val_mask = val_mask[val_img_index].cpu().detach().numpy().transpose((1, 2, 0))
+    prediction = pred[val_img_index].cpu().detach().numpy()
+    prediction = prediction.transpose((1, 2, 0))
+    prediction = np.clip(prediction, 0, 1)
+    prediction *= 255
+    prediction = np.array(
+        [prediction[:, :, 0], prediction[:, :, 0], prediction[:, :, 0]]
+    )
+    prediction = prediction.transpose((1, 2, 0))
+
+    res = y[val_img_index].cpu().detach().numpy()
+    res = res.transpose(1, 2, 0)
+    res = np.clip(res, 0, 1)
+    res *= 255
+    if val_mask != '':
+        res = np.array([res[:, :, 0], res[:, :, 0], val_mask[:, :, 0] * 255])
+    else:
+        res = np.array([res[:, :, 0],res[:, :, 0],res[:, :, 0]])
+    res = res.transpose((1, 2, 0))
+
+    con = np.concatenate((prediction, res), axis=1)
+    image_name = image_name[val_img_index]
+    image_name = image_name.replace("\\", "/")
+    image_name = image_name.split("/")[-1].split(".")[0]
+    image_path = "{}/epoch_{:0>5}_img_{}_pred_res.png".format(store_path, epoch, image_name)
+    #print("store: {}".format(image_path))
+    cv2.imwrite(image_path, con)
+    return image_path
+
+
 def main(opt):
     experiment_path = os.path.join(opt.workdir, "train", opt.experiment_name)
     print('Training results will be stored at', experiment_path)
@@ -141,7 +364,6 @@ def main(opt):
     lossFn = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=opt.learning_rate, betas=(0.5, 0.999))
 
-    best_score = 0
     no_improve_epoch = 0
     if opt.patience == None:
         patience = opt.epochs
@@ -173,7 +395,6 @@ def main(opt):
                 x, y = x.to(device), y.to(device)
                 optimizer.zero_grad()
                 pred = model(x)
-
             # number_of_pixels_in_batch = opt.img_size*opt.img_size * y.sum()
             # zero_values = number_of_pixels_in_batch - y.sum()
             # if not opt.no_loss_mask:
@@ -199,7 +420,7 @@ def main(opt):
 
         for i, batch in enumerate(mDataloader.val_dataloader):
             optimizer.zero_grad()
-           
+
             if not opt.no_loss_mask:
                 val_x, val_y, val_mask, val_image_names = (
                     batch["image"],
@@ -285,6 +506,7 @@ def main(opt):
         #                  scaled_val_loss/mDataloader.val_dataloader.__len__())
 
 
+
         if opt.mlflow:
             mlflow.log_metric(
                 "train_loss", float(train_loss) / mDataloader.train_dataloader.__len__(), step=epoch
@@ -328,6 +550,10 @@ def main(opt):
                 current_score
             )
         )
+        # set the best_score to the score of the first epoch
+        if epoch==0:
+            best_score = current_score
+
         if current_score > best_score:
             best_score = current_score
             no_improve_epoch = 0
@@ -369,135 +595,6 @@ def main(opt):
         model.load_state_dict(torch.load(os.path.join(experiment_path, "best_model.pth"),map_location=device))
         opt.dataset = opt.test_dataset
         test.main(opt, init=False, model=model)
-
-
-def output_val_image(val_pred,val_mask,val_x,val_y,experiment_path,epoch,val_image_names,val_img_index):
-    # image_path = plot_pred(pred, y,experiment_path,str(epoch), image_names[0])
-    # plot val:
-    image_path = plot_pred(
-        val_pred,
-        val_mask,
-        val_y,
-        experiment_path,
-        str(epoch),
-        val_image_names,
-        val_img_index
-    )
-    #print(image_path)
-    # if epoch == 0:
-    #     images_paths = plot_training_images(val_x.cpu().detach().numpy(), experiment_path)
-    #     if opt.mlflow:
-    #         for train_batch_image_path in images_paths:
-    #             mlflow.log_artifact(train_batch_image_path, "images")
-    if opt.mlflow:
-        mlflow.log_artifact(image_path, "images")
-
-
-def calculate_precision_recall_with_confidence(
-    annotations: np.array, predictions: np.array
-) -> tuple:
-    """Calculate precision and recall of predictions with regard to the annotations."""
-    # Get true positives by masking away all annotated negatives and summing the rest
-    true_positives = (predictions * annotations).sum()
-
-    # Invert the vector by setting all 1s to 0, and all 0s to 1
-    inverse_annotations = annotations * (-1) + 1
-    # Get false positives by masking with the inverse of the annotations and summing the rest
-    false_positives = (predictions * inverse_annotations).sum()
-
-    # Get false negatives by taking the difference between the predictions and 1, while masking away all annotated negatives
-    false_negatives = ((1 - predictions) * annotations).sum()
-
-    # Calculate precision, if we have no predicted positives, set precision to 0
-    if (true_positives + false_positives) == 0:
-        precision = 0.0
-    else:
-        precision = true_positives / (true_positives + false_positives)
-
-    # Calculate recall, if we have no true positives or false negatives, set recall to 0
-    if (true_positives + false_negatives) == 0:
-        recall = 0.0
-    else:
-        recall = true_positives / (true_positives + false_negatives)
-
-    return precision, recall
-
-
-def calculate_binary_precision_recall(annotations: np.array, predictions: np.array, mask:np.array) -> tuple:
-    """Calculate binary precision by rounding the predicitons to 0 or 1 before calculation."""
-    target_pixels = np.where(mask > 0)
-    rounded_predictions = np.round(predictions)
-
-    true_positives = ((rounded_predictions[target_pixels] == 1) & (annotations[target_pixels] == 1)).sum()
-    false_positives = ((rounded_predictions[target_pixels] == 1) & (annotations[target_pixels] == 0)).sum()
-    false_negatives = ((rounded_predictions[target_pixels] == 0) & (annotations[target_pixels] == 1)).sum()
-
-    false_pixels = abs(annotations[target_pixels]-rounded_predictions[target_pixels]).sum()
-    total_pixels = len(annotations[target_pixels])
-    correct_pixels = total_pixels-false_pixels
-    accuracy = correct_pixels/total_pixels
-
-    # Calculate precision, if we have no predicted positives, set precision to 0
-    if (true_positives + false_positives) == 0:
-        precision = 0.0
-    else:
-        precision = true_positives / (true_positives + false_positives)
-
-    # Calculate recall, if we have no true positives or false negatives, set recall to 0
-    if (true_positives + false_negatives) == 0:
-        recall = 0.0
-    else:
-        recall = true_positives / (true_positives + false_negatives)
-    return precision, recall, accuracy
-
-
-def plot_training_images(images, path):
-    #pdb.set_trace()
-   # number_of_images = images.shape[0]
-    images_paths = []
-    for index, image in enumerate(images):
-        if index >= 4:
-            break
-        #only keep first 3 channels
-        image2 = image[:3].transpose((1, 2, 0))
-        image2 *= 255
-        image_path = path+"/train_image_{}.png".format(index)
-        images_paths.append(image_path)
-        cv2.imwrite(image_path, image2)
-    return images_paths
-
-
-def plot_pred(pred, val_mask, y, store_path, epoch, image_name, val_img_index):
-    if val_mask != '':
-        val_mask = val_mask[val_img_index].cpu().detach().numpy().transpose((1, 2, 0))
-    prediction = pred[val_img_index].cpu().detach().numpy()
-    prediction = prediction.transpose((1, 2, 0))
-    prediction = np.clip(prediction, 0, 1)
-    prediction *= 255
-    prediction = np.array(
-        [prediction[:, :, 0], prediction[:, :, 0], prediction[:, :, 0]]
-    )
-    prediction = prediction.transpose((1, 2, 0))
-
-    res = y[val_img_index].cpu().detach().numpy()
-    res = res.transpose(1, 2, 0)
-    res = np.clip(res, 0, 1)
-    res *= 255
-    if val_mask != '':
-        res = np.array([res[:, :, 0], res[:, :, 0], val_mask[:, :, 0] * 255])
-    else:
-        res = np.array([res[:, :, 0],res[:, :, 0],res[:, :, 0]])
-    res = res.transpose((1, 2, 0))
-
-    con = np.concatenate((prediction, res), axis=1)
-    image_name = image_name[val_img_index]
-    image_name = image_name.replace("\\", "/")
-    image_name = image_name.split("/")[-1].split(".")[0]
-    image_path = "{}/epoch_{:0>5}_img_{}_pred_res.png".format(store_path, epoch, image_name)
-    #print("store: {}".format(image_path))
-    cv2.imwrite(image_path, con)
-    return image_path
-
 
 if __name__ == "__main__":
 
@@ -555,11 +652,11 @@ if __name__ == "__main__":
 
 
 # below code is for trouble-shooting purposes only
+
 # from types import SimpleNamespace
-#
 # # Replace 'example_region' and 'example_configuration' with actual values
 # region = 'alpine'
-# configuration = '22,33,44,55,44,33,22'
+# configuration = '22,11,5,11,22'
 #
 # opt = SimpleNamespace(
 #     epochs=100,
@@ -582,6 +679,7 @@ if __name__ == "__main__":
 #     target_img_name="",
 #     workdir="/Users/toban562/Projects/bioscann",
 #     n_channels_per_layer=configuration,  # Replace with actual configuration
-#     n_coefficients_per_upsampling_layer=None
+#     n_coefficients_per_upsampling_layer=None,
+#     patience=20
 # )
-
+#
