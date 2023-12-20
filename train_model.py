@@ -166,30 +166,21 @@ def calculate_binary_precision_recall(annotations: np.array, predictions: np.arr
     # plot_arrays(predictions)
     target_pixels = np.where(mask > 0)
 
-    #
-    # # how many pixels are there
-    # rounded_predictions[target_pixels].shape[0]
-    # # how many pixels are supposed to be 1
-    # (annotations[target_pixels] == 1).sum()
-    # # how many pixels are supposed to be 0
-    # (annotations[target_pixels] == 0).sum()
-    # # how many pixels were predicted as 1
-    # (rounded_predictions[target_pixels] == 1).sum()
-    # # how many pixels were predicted as 0
-    # (rounded_predictions[target_pixels] == 0).sum()
-    #
-    #
-    #
-    # rounded_predictions[target_pixels].shape
-    # (rounded_predictions[target_pixels] == 1).sum()
-    # (annotations[target_pixels]==0).sum()
-    # (annotations[target_pixels]==1).sum()
-    # (rounded_predictions[target_pixels] == 1).sum()
-
-
     # round the predictions to be binary
     rounded_predictions = np.round(predictions)
     # plot_arrays(rounded_predictions)
+
+    # how many pixels are there
+    rounded_predictions[target_pixels].shape[0]
+    # how many pixels are supposed to be 1
+    (annotations[target_pixels] == 1).sum()
+    # how many pixels are supposed to be 0
+    (annotations[target_pixels] == 0).sum()
+    # how many pixels were predicted as 1
+    (rounded_predictions[target_pixels] == 1).sum()
+    # how many pixels were predicted as 0
+    (rounded_predictions[target_pixels] == 0).sum()
+
 
     true_positives = ((rounded_predictions[target_pixels] == 1) & (annotations[target_pixels] == 1)).sum()
     false_positives = ((rounded_predictions[target_pixels] == 1) & (annotations[target_pixels] == 0)).sum()
@@ -493,11 +484,11 @@ def main(opt):
 
 
         max_loss_value = 0.1 # scale loss to also be roughly between 0 and 1 as all other metrics
-        scaled_val_loss = val_loss / max_loss_value
+        scaled_val_loss = val_loss/mDataloader.val_dataloader.__len__() / max_loss_value
         # Calculate F1 score
         val_f1 = f1_score(val_binary_precision/mDataloader.val_dataloader.__len__(), val_binary_recall/mDataloader.val_dataloader.__len__())
         # Update the scoring formula to include F1
-        current_score = val_binary_accuracy/mDataloader.val_dataloader.__len__() \
+        current_score = float(val_binary_accuracy) / mDataloader.val_dataloader.__len__() \
                         + val_f1 \
                         - scaled_val_loss
         # current_score = (val_binary_accuracy/mDataloader.val_dataloader.__len__() +
@@ -568,6 +559,10 @@ def main(opt):
         else:
             no_improve_epoch += 1
 
+        if no_improve_epoch > patience:
+            print(f"Stopping early at epoch {epoch} due to no improvement.")
+            break
+
         if epoch != 0 and epoch % 100 == 0:
             torch.save(
                 model.state_dict(),
@@ -582,9 +577,7 @@ def main(opt):
                     ),
                     "weights",
                 )
-        if no_improve_epoch > patience:
-            print(f"Stopping early at epoch {epoch} due to no improvement.")
-            break
+
 
 
     torch.save(model.state_dict(), os.path.join(experiment_path, "model.pth"))
