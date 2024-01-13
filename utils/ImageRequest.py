@@ -149,25 +149,31 @@ def get_image(poly, image_coordinates, polygon_index, img_size,rest_api, apis, u
 
 
 def get_image_no_polygon(dataset_path, image_coordinates, polygon_index, img_size,rest_api, apis, username, password):
-    image_name = "id-{}-{}.tiff".format(rest_api,image_coordinates)
+    image_name = "{}-{}.tiff".format(rest_api,image_coordinates)
     image_name = image_name.replace('\'','').replace('"','').replace('[','').replace(']','').replace(', ','-')
     image_name = os.path.join(dataset_path,image_name)
-    params = apis[rest_api]['params'](image_coordinates, image_size=img_size)
-    try_get_image_attempt = 0
-    while True:
-        try:
-            download_url = apis[rest_api]['url']()
-            download_tif_image(download_url, params, username, password, image_name)
-            break
-        except Exception as e:
-            # print(e)
-            time.sleep(0.01)
-            try_get_image_attempt += 1
-            if try_get_image_attempt > 30:
-                return
-            else:
-                pass
-    # print(try_get_image_attempt)
+    if not os.path.isfile(image_name):
+        params = apis[rest_api]['params'](image_coordinates, image_size=img_size)
+        server_url = apis[rest_api]['url']()
+        download_url = get_image_url(server_url, params, username, password)
+        try_get_image_attempt = 0
+        while True:
+            try:
+                print(download_url)
+                print('Downloading image data...')
+                download_tif_image(download_url, username, password, image_name)
+                break
+            except Exception as e:
+                # print(rest_api)
+                # print(params)
+                # print(e)
+                time.sleep(0.01)
+                try_get_image_attempt += 1
+                if try_get_image_attempt > 30:
+                    return
+                else:
+                    pass
+        print(try_get_image_attempt)
     return image_name
 
 

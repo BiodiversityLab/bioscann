@@ -15,13 +15,6 @@ pip install -r requirements.txt
 ```
 
 ## Define cropping window around each polygon
-#### Alpine
-```commandline
-python crop_windows_from_polygons.py \
-    --input_path data/polygons/alpine \
-    --output_path data/processed_geodata/alpine/cropped_windows \
-    --no_overlap
-```
 
 #### Boreal_east
 ```commandline
@@ -31,46 +24,8 @@ python crop_windows_from_polygons.py \
     --no_overlap
 ```
 
-#### Boreal_northwest
-```commandline
-python crop_windows_from_polygons.py \
-    --input_path data/polygons/boreal_northwest \
-    --output_path data/processed_geodata/boreal_northwest/cropped_windows \
-    --no_overlap
-```
-
-#### Boreal_south
-```commandline
-python crop_windows_from_polygons.py \
-    --input_path data/polygons/boreal_south \
-    --output_path data/processed_geodata/boreal_south/cropped_windows \
-    --no_overlap
-```
-
-#### Continental
-```commandline
-python crop_windows_from_polygons.py \
-    --input_path data/polygons/continental \
-    --output_path data/processed_geodata/continental/cropped_windows \
-    --no_overlap
-```
 
 ## Extract spatial data for each cropping window
-#### Alpine
-```commandline
-region="alpine"
-python extract_geo_data.py \
-    --output_path data/processed_geodata/${region}/${region}_geodata  \
-    --window_coordinates data/processed_geodata/${region}/cropped_windows \
-    --configuration version_public_sat \
-    --test_config version_1 \
-    --testset_size 0.2 \
-    --img-size 128 \
-    --username uppun_user \
-    --password 4sjHa2YQ \
-    --logging_off \
-    --threads 30
-```
 
 #### Boreal_east
 ```commandline
@@ -82,56 +37,34 @@ python extract_geo_data.py \
     --test_config version_1 \
     --testset_size 0.2 \
     --img-size 128 \
-    --username uppun_user \
-    --password 4sjHa2YQ \
+    --username ***** \
+    --password ***** \
     --logging_off \
     --threads 30
 ```
 
-#### Boreal_northwest
+## Train model
+#### Boreal_east
 ```commandline
-region="boreal_northwest"
-python extract_geo_data.py \
-    --output_path data/processed_geodata/${region}/${region}_geodata  \
-    --window_coordinates data/processed_geodata/${region}/cropped_windows \
-    --configuration version_public_sat \
-    --test_config version_1 \
-    --testset_size 0.2 \
-    --img-size 128 \
-    --username uppun_user \
-    --password 4sjHa2YQ \
-    --logging_off \
-    --threads 30
+region="boreal_east"
+configuration="20,30,40,50,40,30,20"
+
+python train_model.py \
+    --batch 14 \
+    --input 11 \
+    --output 1 \
+    --algorithm AttentionPixelClassifierFlex \
+    --device gpu \
+    --dataset data/processed_geodata/${region}/${region}_geodata \
+    --validation data/processed_geodata/${region}/${region}_geodata/validation \
+    --test_dataset data/processed_geodata/${region}/${region}_geodata/testset/ \
+    --plot \
+    --experiment_name ${region} \
+    --epochs 300 \
+    --img_size 128 \
+    --mlflow \
+    --n_channels_per_layer ${configuration} \
+    --pfi \
+    --patience 20
 ```
 
-#### Boreal_south
-```commandline
-region="boreal_south"
-python extract_geo_data.py \
-    --output_path data/processed_geodata/${region}/${region}_geodata  \
-    --window_coordinates data/processed_geodata/${region}/cropped_windows \
-    --configuration version_public_sat \
-    --test_config version_1 \
-    --testset_size 0.2 \
-    --img-size 128 \
-    --username uppun_user \
-    --password 4sjHa2YQ \
-    --logging_off \
-    --threads 30
-```
-
-#### Continental
-```commandline
-region="continental"
-python extract_geo_data.py \
-    --output_path data/processed_geodata/${region}/${region}_geodata  \
-    --window_coordinates data/processed_geodata/${region}/cropped_windows \
-    --configuration version_public_sat \
-    --test_config version_1 \
-    --testset_size 0.2 \
-    --img-size 128 \
-    --username uppun_user \
-    --password 4sjHa2YQ \
-    --logging_off \
-    --threads 30
-```
