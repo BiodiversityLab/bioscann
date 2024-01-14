@@ -27,3 +27,8 @@ def get_mask_image(indata_mask_configurations, mask_image, center_polygon, indat
         feature_layer = imread(feature_layer[0])
         mask_image = create_filter_mask(feature_layer, mask_image, feature_layer_config)
     return mask_image
+
+def download_landcover_channel(indata_mask_configurations, image_coordinates, indata_path, img_size, username, password):
+    for feature_layer_config in indata_mask_configurations:
+        feature_layer = ir.get_channels(image_coordinates, indata_path, img_size, selected_apis=[feature_layer_config['api']], apis=ra.apis, username=username, password=password, get_image_coord=False)
+    return feature_layer

@@ -1,23 +1,19 @@
-import argparse
-import utils.ImageRequest as ir
+
 import time
-
-import geopandas as gpd
-from shapely.geometry import MultiPolygon, Point
-
-import numpy as np
-import os
-
-from osgeo import gdal
-import osgeo.osr as osr
-
-import utils.RestAPIs as ra
-
 import json
 import errno
 import shutil
+import os
+import argparse
+import numpy as np
+import geopandas as gpd
+from shapely.geometry import MultiPolygon, Point
+from osgeo import gdal
+import osgeo.osr as osr
 from concurrent.futures import ProcessPoolExecutor,ThreadPoolExecutor
-
+import utils.ImageRequest as ir
+import utils.mask_image as mi
+import utils.RestAPIs as ra
 
 def ensure_dir(directory):
     try:
@@ -77,6 +73,12 @@ def process_tile(args):
                                selected_apis=opt.selected_apis, apis=ra.apis, username=opt.username,
                                password=opt.password, meters_per_pixel=int(opt.meters_per_pixel),
                                get_image_coord=False)
+    mi.download_landcover_channel(opt.json_data[opt.configuration]['prediction_masks'],
+                                  image_coordinates,
+                                  opt.download_folder,
+                                  opt.image_size,
+                                  opt.username,
+                                  opt.password)
     # #print(channels)
     # if (len(channels) > 0):
     #     if channels[0] == None:
