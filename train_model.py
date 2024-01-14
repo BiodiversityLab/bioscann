@@ -550,8 +550,12 @@ def main(opt):
             no_improve_epoch = 0
             # Save the best model
             torch.save(
-                model.state_dict(), os.path.join(experiment_path, "best_model.pth")
+                model.state_dict(), os.path.join(experiment_path, "best_model_state_dict.pth")
             )
+            torch.save(
+                model, os.path.join(experiment_path, "best_model.pth")
+            )
+
             if opt.mlflow:
                 mlflow.log_artifact(
                     os.path.join(experiment_path, "best_model.pth"), "weights"
@@ -566,26 +570,27 @@ def main(opt):
         if epoch != 0 and epoch % 100 == 0:
             torch.save(
                 model.state_dict(),
-                os.path.join(
-                    experiment_path, "epoch_{}_loss_{}.pth".format(epoch, loss)
-                ),
+                os.path.join(experiment_path, "epoch_{}_loss_{}_state_dict.pth".format(epoch, loss)),
+            )
+            torch.save(
+                model,
+                os.path.join(experiment_path, "epoch_{}_loss_{}.pth".format(epoch, loss)),
             )
             if opt.mlflow:
                 mlflow.log_artifact(
-                    os.path.join(
-                        experiment_path, "epoch_{}_loss_{}.pth".format(epoch, loss)
-                    ),
+                    os.path.join(experiment_path, "epoch_{}_loss_{}_state_dict.pth".format(epoch, loss)),
                     "weights",
                 )
 
 
 
-    torch.save(model.state_dict(), os.path.join(experiment_path, "model.pth"))
+    torch.save(model.state_dict(), os.path.join(experiment_path, "model_state_dict.pth"))
+    torch.save(model, os.path.join(experiment_path, "model.pth"))
     if opt.mlflow:
-        mlflow.log_artifact(os.path.join(experiment_path, "model.pth"), "weights")
+        mlflow.log_artifact(os.path.join(experiment_path, "model_state_dict.pth"), "weights")
     
     if opt.test_dataset:
-        model.load_state_dict(torch.load(os.path.join(experiment_path, "best_model.pth"),map_location=device))
+        model.load_state_dict(torch.load(os.path.join(experiment_path, "best_model_state_dict.pth"),map_location=device))
         opt.dataset = opt.test_dataset
         test.main(opt, init=False, model=model)
 

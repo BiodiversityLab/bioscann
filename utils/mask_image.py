@@ -5,6 +5,7 @@ import utils.RestAPIs as ra
 def create_filter_mask(feature_layer, filter_image, feature_layer_config):
     #print(feature_layer.shape)
     for index, channel in enumerate(feature_layer_config['channels']):
+        print(channel)
         if len(feature_layer.shape) > 2:
             for x in range(len(filter_image[0])):
                 for y in range(len(filter_image[1])):

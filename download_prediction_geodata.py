@@ -205,15 +205,15 @@ if __name__=='__main__':
     opt = parser.parse_args()
     main(opt)
 
-
+#
 # # below code is for trouble-shooting purposes only
 # from types import SimpleNamespace
 #
 # opt = SimpleNamespace(
 #     coordinates='522626,6642549,528626,6648549',
-#     offset=1480,
-#     image_size=148,
-#     download_folder='data/prediction_geodata/download_folder',
+#     offset=1280,
+#     image_size=128,
+#     download_folder='data/prediction_geodata/test',
 #     configuration='version_public_sat',
 #     meters_per_pixel=10,
 #     image_scale=1,

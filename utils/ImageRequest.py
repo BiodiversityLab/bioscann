@@ -126,10 +126,10 @@ def get_image(poly, image_coordinates, polygon_index, img_size,rest_api, apis, u
     if not os.path.isfile(image_name):
         params = apis[rest_api]['params'](image_coordinates[0], image_size=img_size)
         server_url = apis[rest_api]['url']()
-        download_url = get_image_url(server_url, params, username, password)
         try_get_image_attempt = 0
         while True:
             try:
+                download_url = get_image_url(server_url, params, username, password)
                 print(download_url)
                 print('Downloading image data...')
                 download_tif_image(download_url, username, password, image_name)
@@ -155,10 +155,10 @@ def get_image_no_polygon(dataset_path, image_coordinates, polygon_index, img_siz
     if not os.path.isfile(image_name):
         params = apis[rest_api]['params'](image_coordinates, image_size=img_size)
         server_url = apis[rest_api]['url']()
-        download_url = get_image_url(server_url, params, username, password)
         try_get_image_attempt = 0
         while True:
             try:
+                download_url = get_image_url(server_url, params, username, password)
                 print(download_url)
                 print('Downloading image data...')
                 download_tif_image(download_url, username, password, image_name)
@@ -213,10 +213,10 @@ def write_geotif_at_location(ref_image_filepath, out_image_filepath, list_of_num
     ds = None
     return None
 
-def compose_indata(dataset_path, channels, apis, image_name='', mask_image=''):
+def compose_indata(dataset_path, channels, apis, image_name='',target_dir=''):
     imgs = []
     for i, img in enumerate(channels):
-        im = imread(img)
+        im = imread(os.path.join(target_dir,img))
         logging.info(f'Reading file {img}')
         #normalize:
         feature_name = img.split('-')[-5].split('.')[0]
@@ -232,18 +232,17 @@ def compose_indata(dataset_path, channels, apis, image_name='', mask_image=''):
 
     if len(imgs) > 0:
         try:
-
             #for training
             if image_name == '':
                 cluster_id = img.split('/')[-1].split('-')[1]
                 #imsave(os.path.join(dataset_path,"{}.tiff".format(cluster_id)),imgs, compress='lzma')
-                write_geotif_at_location(channels[0],os.path.join(dataset_path,"{}.tiff".format(cluster_id)), imgs)
+                write_geotif_at_location(os.path.join(target_dir,channels[0]),os.path.join(dataset_path,"{}.tiff".format(cluster_id)), imgs)
                 #if mask_image != '':
                 #    write_geotif_at_location(channels[0],os.path.join(dataset_path,"{}_mask.tiff".format(cluster_id)), np.array([mask_image]))
                 return image_name, len(imgs)
             else:
                 #imsave(os.path.join(dataset_path,image_name),imgs, compress='lzma')
-                write_geotif_at_location(channels[0],os.path.join(dataset_path,image_name), imgs)
+                write_geotif_at_location(os.path.join(target_dir,channels[0]),os.path.join(dataset_path,image_name), imgs)
                 return image_name, len(imgs)
 
         except Exception as e:
