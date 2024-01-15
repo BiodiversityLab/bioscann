@@ -254,7 +254,7 @@ def plot_pred(pred, val_mask, y, store_path, epoch, image_name, val_img_index):
 
 
 def main(opt):
-    experiment_path = os.path.join(opt.workdir, "train", opt.experiment_name)
+    experiment_path = os.path.join(opt.workdir, "train", opt.experiment_name,opt.n_channels_per_layer)
     print('Training results will be stored at', experiment_path)
     if not os.path.exists(experiment_path):
         os.makedirs(experiment_path)
@@ -654,7 +654,7 @@ if __name__ == "__main__":
 # from types import SimpleNamespace
 # # Replace 'example_region' and 'example_configuration' with actual values
 # region = 'alpine'
-# configuration = '22,11,5,11,22'
+# configuration = '22,11,5'
 #
 # opt = SimpleNamespace(
 #     epochs=100,
