@@ -112,6 +112,21 @@ def check_if_point_in_target_area(args):
     else:
         return True
 
+def run_parallel_script(args):
+    try_get_image_attempt = 0
+    while True:
+        try:
+            process_tile(args)
+            break
+        except Exception as e:
+            time.sleep(0.01)
+            try_get_image_attempt += 1
+            if try_get_image_attempt > 30:
+                return
+            else:
+                print('Attempt %i: Retrying processing of tile %i.'%(try_get_image_attempt+1,args[2]))
+                pass
+
 
 def main(opt):
 
@@ -158,25 +173,18 @@ def main(opt):
     args = [arglist for arglist in args if check_if_point_in_target_area(arglist)]
 
     start_time_loop = time.time()
-    if opt.threads > 1:
-        print('Running parallel on %i threads'%opt.threads)
-        # with ProcessPoolExecutor(max_workers=opt.threads) as executor:
-        #     results = [executor.submit(process_tile, arglist) for arglist in args]
-        results=[]
-        with ThreadPoolExecutor(max_workers=opt.threads) as executor:
-            results = list(executor.map(process_tile, args))
-        # print(results)
-    else:
-        index = 0
-        for y in range(minY, maxY, opt.offset + int(opt.additional_offset)):
-            for x in range(minX, maxX, opt.offset + int(opt.additional_offset)):
-                process_tile([y,x,index,opt])
-                index += 1
-
+    print('Running parallel on %i threads'%opt.threads)
+    # with ProcessPoolExecutor(max_workers=opt.threads) as executor:
+    #     results = [executor.submit(process_tile, arglist) for arglist in args]
+    results=[]
+    with ThreadPoolExecutor(max_workers=opt.threads) as executor:
+        results = list(executor.map(run_parallel_script, args))
+    # print(results)
     end_time = time.time()
 
     elapsed_time = end_time - start_time
     elapsed_time_loop = end_time - start_time_loop
+
     print("Ran on %i threads" %opt.threads)
     print(f"Code executed in {elapsed_time} seconds")
     print(f"Loop executed in {elapsed_time_loop} seconds")
