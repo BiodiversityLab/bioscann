@@ -217,7 +217,7 @@ if __name__=='__main__':
 #     configuration='version_public_sat',
 #     meters_per_pixel=10,
 #     image_scale=1,
-#     additional_offset=-200,
+#     additional_offset=-400,
 #     target_server='https://geodata.skogsstyrelsen.se/arcgis/rest/',
 #     username='xxxx',
 #     password='xxxx',

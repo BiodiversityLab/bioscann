@@ -170,3 +170,4 @@ processed_geodata/
 # exclude output of training
 mlruns/
 train/
+predictions/

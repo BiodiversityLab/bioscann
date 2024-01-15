@@ -106,7 +106,7 @@ def load_model(opt):
     return model, device
 
 
-def plot_pred(pred, image_name, in_ds, image_scale):
+def plot_pred(pred, image_name, in_ds, image_scale,crop_corners=0):
     if not isinstance(pred, np.ndarray) :
         pred = pred.cpu().detach().numpy()
         pred = pred.transpose((1, 2, 0))
@@ -114,7 +114,7 @@ def plot_pred(pred, image_name, in_ds, image_scale):
 
     #cv2.imwrite(image_name.replace('.tiff','.png'),prediction*255)
 
-    write_geotiff(image_name,prediction,in_ds, image_scale)
+    write_geotiff(image_name,prediction,in_ds, image_scale,crop_corners)
 
 
 def read_geotiff(filename):
@@ -123,7 +123,7 @@ def read_geotiff(filename):
     arr = band.ReadAsArray()
     return arr, ds
     
-def write_geotiff(filename, arr, in_ds, image_scale):
+def write_geotiff(filename, arr, in_ds, image_scale, crop_corners):
    # pdb.set_trace()
     #gdal.SetConfigOption('GTIFF_SRS_SOURCE', 'EPSG')
     arr_type = gdal.GDT_Float32
@@ -133,13 +133,31 @@ def write_geotiff(filename, arr, in_ds, image_scale):
         out_ds = driver.Create('', arr.shape[1], arr.shape[0], 1, arr_type)
     else:
         driver = gdal.GetDriverByName("GTiff")
-        
         out_ds = driver.Create(filename, arr.shape[1], arr.shape[0], 1, arr_type, options=['COMPRESS=LZW'])
     srs = osr.SpatialReference()
     srs.ImportFromEPSG(3006)
     out_ds.SetProjection(srs.ExportToWkt())
-    #out_ds.SetProjection(in_ds.GetProjection())
-    out_ds.SetGeoTransform(in_ds.GetGeoTransform())
+
+    if crop_corners > 0:
+        # Get original GeoTransform
+        geo_transform = in_ds.GetGeoTransform()
+
+        # Calculate new top-left X and Y coordinates
+        new_top_left_x = geo_transform[0] + crop_corners * geo_transform[1]
+        new_top_left_y = geo_transform[3] + crop_corners * geo_transform[5]
+
+        # Create new GeoTransform
+        new_geo_transform = (
+            new_top_left_x,
+            geo_transform[1],
+            geo_transform[2],
+            new_top_left_y,
+            geo_transform[4],
+            geo_transform[5]
+        )
+        out_ds.SetGeoTransform(new_geo_transform)
+    else:
+        out_ds.SetGeoTransform(in_ds.GetGeoTransform())
     if len(arr.shape) > 2:
        arr = arr.squeeze(2)
     #pdb.set_trace()
@@ -193,10 +211,15 @@ def process_tile(args):
                 pred = pred*mask_image
 
             pred = pred.round(decimals=4)
+            if opt.crop_corners > 0:
+                x=opt.crop_corners
+                pred = pred[x:-x, x:-x]
+
             plot_pred(pred,
                       os.path.join(predictions_folder,'{}_{}.tiff'.format(opt.outfile_stem, index)),
                       ds,
-                      float(1))
+                      float(1),
+                      crop_corners=opt.crop_corners)
             #
             # plot_pred(np.array([mask_image]).transpose(1, 2, 0),
             #           os.path.join(predictions_folder,'{}_{}.tiff'.format('mask', index)),
@@ -332,9 +355,11 @@ if __name__=='__main__':
     parser.add_argument('--target_region', action='store', default='')
     parser.add_argument('--conv_layer_depth_info', action='store', type=str, default='')
     parser.add_argument("--apply_mask", action="store_true", default=False)
+    parser.add_argument('--crop_corners', type=int, action='store', default=0,help='Specify number of pixels to be removed from the edge of the images (to remove edge-effect).')
+
     opt = parser.parse_args()
     main(opt)
-#
+
 # # below code is for trouble-shooting purposes only
 # from types import SimpleNamespace
 #
@@ -350,5 +375,6 @@ if __name__=='__main__':
 #     region_id_field = 'EU_REGION',
 #     target_region='',
 #     conv_layer_depth_info='100,60,20,10,20,60,100',
-#     apply_mask=True
+#     apply_mask=True,
+#     crop_corners=20
 #     )

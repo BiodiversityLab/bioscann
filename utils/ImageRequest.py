@@ -173,7 +173,7 @@ def get_image_no_polygon(dataset_path, image_coordinates, polygon_index, img_siz
                     return
                 else:
                     pass
-        print(try_get_image_attempt)
+        #print(try_get_image_attempt)
     return image_name
 
 
