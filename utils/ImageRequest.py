@@ -179,10 +179,8 @@ def get_image_no_polygon(dataset_path, image_coordinates, polygon_index, img_siz
 
 def write_geotif_at_location(ref_image_filepath, out_image_filepath, list_of_numpy_arr):
     '''
-
     Writes a geotif at the same position as a reference image. 
-    Each band in the geotif is added in the list as np.array 
-    
+    Each band in the geotif is added in the list as np.array
     input:
         ref_image_filepath (string) - path to georeferences image
         out_image_filepath (string) - path to output image
@@ -234,7 +232,10 @@ def compose_indata(dataset_path, channels, apis, image_name='',target_dir=''):
         try:
             #for training
             if image_name == '':
-                cluster_id = img.split('/')[-1].split('-')[1]
+                if img.startswith('id'):
+                    cluster_id = os.path.basename(img).split('-')[1]
+                else:
+                    cluster_id = '-'.join(os.path.basename(img).split('-')[-4:]).replace('.tiff','')
                 #imsave(os.path.join(dataset_path,"{}.tiff".format(cluster_id)),imgs, compress='lzma')
                 write_geotif_at_location(os.path.join(target_dir,channels[0]),os.path.join(dataset_path,"{}.tiff".format(cluster_id)), imgs)
                 #if mask_image != '':

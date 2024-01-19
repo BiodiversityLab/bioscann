@@ -51,42 +51,43 @@ def load_model(opt):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     else:
         device = torch.device("cpu")
-    #model = torch.load(opt.trained_model)
-
-    if str(opt.algorithm).lower() == 'attentionpixelclassifier':
-        model = attentionPixelClassifier.AttentionPixelClassifier(
-        input_numChannels=opt.input_channels[0],
-        output_numChannels=opt.output_channels).to(device)
-        image_size=opt.img_size[0]
-    elif str(opt.algorithm).lower() == 'attentionpixelclassifierlite':
-        model = attentionPixelClassifier.AttentionPixelClassifierLite(
-        input_numChannels=opt.input_channels[0],
-        output_numChannels=opt.output_channels).to(device)
-        image_size=opt.img_size[0]
-    elif str(opt.algorithm).lower() == 'attentionpixelclassifiermedium':
-        model = attentionPixelClassifier.AttentionPixelClassifierMedium(
-        input_numChannels=opt.input_channels[0],
-        output_numChannels=opt.output_channels).to(device)
-        image_size=opt.img_size[0]
-    elif str(opt.algorithm).lower() == "attentionpixelclassifierlitedeep":
-        model = attentionPixelClassifier.AttentionPixelClassifierLiteDeep(
-        input_numChannels=opt.input_channels[0],
-        output_numChannels=opt.output_channels).to(device)
-        image_size = opt.img_size[0]
-    elif str(opt.algorithm).lower() == "attentionpixelclassifierflex":
-        n_channels_per_layer = opt.conv_layer_depth_info
-        n_channels_per_layer = np.array(n_channels_per_layer.split(',')).astype(int)
-        if opt.n_coefficients_per_upsampling_layer != None:
-            n_coefficients_per_upsampling_layer = opt.n_coefficients_per_upsampling_layer
-            n_coefficients_per_upsampling_layer = np.array(n_coefficients_per_upsampling_layer.split(',')).astype(int)
-        else:
-            n_coefficients_per_upsampling_layer = opt.n_coefficients_per_upsampling_layer
-        model = attentionPixelClassifier.AttentionPixelClassifierFlex(
-            input_numChannels=opt.input_channels[0],
-            output_numChannels=opt.output_channels,
-            n_channels_per_layer=n_channels_per_layer,
-            n_coefficients_per_upsampling_layer=n_coefficients_per_upsampling_layer
-        ).to(device)
+    model = torch.load(opt.trained_model)
+    model.eval()
+    return model, device
+    # if str(opt.algorithm).lower() == 'attentionpixelclassifier':
+    #     model = attentionPixelClassifier.AttentionPixelClassifier(
+    #     input_numChannels=opt.input_channels[0],
+    #     output_numChannels=opt.output_channels).to(device)
+    #     image_size=opt.img_size[0]
+    # elif str(opt.algorithm).lower() == 'attentionpixelclassifierlite':
+    #     model = attentionPixelClassifier.AttentionPixelClassifierLite(
+    #     input_numChannels=opt.input_channels[0],
+    #     output_numChannels=opt.output_channels).to(device)
+    #     image_size=opt.img_size[0]
+    # elif str(opt.algorithm).lower() == 'attentionpixelclassifiermedium':
+    #     model = attentionPixelClassifier.AttentionPixelClassifierMedium(
+    #     input_numChannels=opt.input_channels[0],
+    #     output_numChannels=opt.output_channels).to(device)
+    #     image_size=opt.img_size[0]
+    # elif str(opt.algorithm).lower() == "attentionpixelclassifierlitedeep":
+    #     model = attentionPixelClassifier.AttentionPixelClassifierLiteDeep(
+    #     input_numChannels=opt.input_channels[0],
+    #     output_numChannels=opt.output_channels).to(device)
+    #     image_size = opt.img_size[0]
+    # elif str(opt.algorithm).lower() == "attentionpixelclassifierflex":
+    #     n_channels_per_layer = opt.conv_layer_depth_info
+    #     n_channels_per_layer = np.array(n_channels_per_layer.split(',')).astype(int)
+    #     if opt.n_coefficients_per_upsampling_layer != None:
+    #         n_coefficients_per_upsampling_layer = opt.n_coefficients_per_upsampling_layer
+    #         n_coefficients_per_upsampling_layer = np.array(n_coefficients_per_upsampling_layer.split(',')).astype(int)
+    #     else:
+    #         n_coefficients_per_upsampling_layer = opt.n_coefficients_per_upsampling_layer
+    #     model = attentionPixelClassifier.AttentionPixelClassifierFlex(
+    #         input_numChannels=opt.input_channels[0],
+    #         output_numChannels=opt.output_channels,
+    #         n_channels_per_layer=n_channels_per_layer,
+    #         n_coefficients_per_upsampling_layer=n_coefficients_per_upsampling_layer
+    #     ).to(device)
     # if str(opt.algorithm).lower() == 'cenet':
     #     model = CENet.CENet(
     #     input_numChannels=opt.input_channels,
@@ -100,10 +101,8 @@ def load_model(opt):
     #     model = AttentionCENet.AttentionCENet(
     #     input_numChannels=opt.input_channels,
     #     output_numChannels=opt.output_channels).to(device)
+    # model.load_state_dict(torch.load(opt.trained_model,map_location=device))
 
-    model.load_state_dict(torch.load(opt.trained_model,map_location=device))
-    model.eval()
-    return model, device
 
 
 def plot_pred(pred, image_name, in_ds, image_scale,crop_corners=0):
@@ -367,14 +366,14 @@ if __name__=='__main__':
 #     geodata_folder='data/prediction_geodata/test',
 #     output_path='predictions',
 #     outfile_stem='prediction',
-#     trained_model='train/boreal_east_flex_100,60,20,10,20,60,100/best_model.pth',
+#     trained_model='train/boreal_northwest/20,30,40,30,20/best_model.pth',
 #     configuration='version_public_sat',
 #     device='0',
 #     threads=10,
 #     region_file='',
 #     region_id_field = 'EU_REGION',
 #     target_region='',
-#     conv_layer_depth_info='100,60,20,10,20,60,100',
+#     conv_layer_depth_info='',
 #     apply_mask=True,
 #     crop_corners=20
 #     )

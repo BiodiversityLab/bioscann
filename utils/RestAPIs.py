@@ -199,7 +199,7 @@ def params_biomass(coordinates_list, image_year='', rendering_rule='', image_siz
         noData='',
         noDataInterpretation='esriNoDataMatchAny',
         interpolation='+RSP_BilinearInterpolation',
-        renderingRule='{"rasterfunction":"Biomassa_gron"}',# renderingRule = '{"rasterfunction":"Biomassa"}'
+        renderingRule='{"rasterfunction":"Biomassa0"}',# renderingRule = '{"rasterfunction":"Biomassa"}'
         compression='LZ77',
         compressionQuality='',
         bandIds='',
