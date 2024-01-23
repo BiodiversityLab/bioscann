@@ -46,62 +46,53 @@ def ensure_dir(directory):
             raise
 
 
-def load_model(opt):
+def load_model(opt,model_stored_as_dict=False):
     if opt.device != 'cpu':
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     else:
         device = torch.device("cpu")
-    model = torch.load(opt.trained_model)
-    model.eval()
+    if model_stored_as_dict:
+        if str(opt.algorithm).lower() == 'attentionpixelclassifier':
+            model = attentionPixelClassifier.AttentionPixelClassifier(
+                input_numChannels=opt.input_channels[0],
+                output_numChannels=opt.output_channels).to(device)
+            image_size = opt.img_size[0]
+        elif str(opt.algorithm).lower() == 'attentionpixelclassifierlite':
+            model = attentionPixelClassifier.AttentionPixelClassifierLite(
+                input_numChannels=opt.input_channels[0],
+                output_numChannels=opt.output_channels).to(device)
+            image_size = opt.img_size[0]
+        elif str(opt.algorithm).lower() == 'attentionpixelclassifiermedium':
+            model = attentionPixelClassifier.AttentionPixelClassifierMedium(
+                input_numChannels=opt.input_channels[0],
+                output_numChannels=opt.output_channels).to(device)
+            image_size = opt.img_size[0]
+        elif str(opt.algorithm).lower() == "attentionpixelclassifierlitedeep":
+            model = attentionPixelClassifier.AttentionPixelClassifierLiteDeep(
+                input_numChannels=opt.input_channels[0],
+                output_numChannels=opt.output_channels).to(device)
+            image_size = opt.img_size[0]
+        elif str(opt.algorithm).lower() == "attentionpixelclassifierflex":
+            n_channels_per_layer = opt.conv_layer_depth_info
+            n_channels_per_layer = np.array(n_channels_per_layer.split(',')).astype(int)
+            if opt.n_coefficients_per_upsampling_layer != None:
+                n_coefficients_per_upsampling_layer = opt.n_coefficients_per_upsampling_layer
+                n_coefficients_per_upsampling_layer = np.array(n_coefficients_per_upsampling_layer.split(',')).astype(
+                    int)
+            else:
+                n_coefficients_per_upsampling_layer = opt.n_coefficients_per_upsampling_layer
+            model = attentionPixelClassifier.AttentionPixelClassifierFlex(
+                input_numChannels=opt.input_channels[0],
+                output_numChannels=opt.output_channels,
+                n_channels_per_layer=n_channels_per_layer,
+                n_coefficients_per_upsampling_layer=n_coefficients_per_upsampling_layer
+            ).to(device)
+        model.load_state_dict(torch.load(opt.trained_model, map_location=device))
+        model.eval()
+    else:
+        model = torch.load(opt.trained_model)
+        model.eval()
     return model, device
-    # if str(opt.algorithm).lower() == 'attentionpixelclassifier':
-    #     model = attentionPixelClassifier.AttentionPixelClassifier(
-    #     input_numChannels=opt.input_channels[0],
-    #     output_numChannels=opt.output_channels).to(device)
-    #     image_size=opt.img_size[0]
-    # elif str(opt.algorithm).lower() == 'attentionpixelclassifierlite':
-    #     model = attentionPixelClassifier.AttentionPixelClassifierLite(
-    #     input_numChannels=opt.input_channels[0],
-    #     output_numChannels=opt.output_channels).to(device)
-    #     image_size=opt.img_size[0]
-    # elif str(opt.algorithm).lower() == 'attentionpixelclassifiermedium':
-    #     model = attentionPixelClassifier.AttentionPixelClassifierMedium(
-    #     input_numChannels=opt.input_channels[0],
-    #     output_numChannels=opt.output_channels).to(device)
-    #     image_size=opt.img_size[0]
-    # elif str(opt.algorithm).lower() == "attentionpixelclassifierlitedeep":
-    #     model = attentionPixelClassifier.AttentionPixelClassifierLiteDeep(
-    #     input_numChannels=opt.input_channels[0],
-    #     output_numChannels=opt.output_channels).to(device)
-    #     image_size = opt.img_size[0]
-    # elif str(opt.algorithm).lower() == "attentionpixelclassifierflex":
-    #     n_channels_per_layer = opt.conv_layer_depth_info
-    #     n_channels_per_layer = np.array(n_channels_per_layer.split(',')).astype(int)
-    #     if opt.n_coefficients_per_upsampling_layer != None:
-    #         n_coefficients_per_upsampling_layer = opt.n_coefficients_per_upsampling_layer
-    #         n_coefficients_per_upsampling_layer = np.array(n_coefficients_per_upsampling_layer.split(',')).astype(int)
-    #     else:
-    #         n_coefficients_per_upsampling_layer = opt.n_coefficients_per_upsampling_layer
-    #     model = attentionPixelClassifier.AttentionPixelClassifierFlex(
-    #         input_numChannels=opt.input_channels[0],
-    #         output_numChannels=opt.output_channels,
-    #         n_channels_per_layer=n_channels_per_layer,
-    #         n_coefficients_per_upsampling_layer=n_coefficients_per_upsampling_layer
-    #     ).to(device)
-    # if str(opt.algorithm).lower() == 'cenet':
-    #     model = CENet.CENet(
-    #     input_numChannels=opt.input_channels,
-    #     output_numChannels=opt.output_channels).to(device)
-    # elif str(opt.algorithm).lower() == 'attentionunet':
-    #     print("run with attentionUNet")
-    #     model = AttentionUNet.AttentionUNet(
-    #     input_numChannels=opt.input_channels,
-    #     output_numChannels=opt.output_channels).to(device)
-    # elif str(opt.algorithm).lower() == 'attentioncenet':
-    #     model = AttentionCENet.AttentionCENet(
-    #     input_numChannels=opt.input_channels,
-    #     output_numChannels=opt.output_channels).to(device)
-    # model.load_state_dict(torch.load(opt.trained_model,map_location=device))
 
 
 
@@ -314,7 +305,7 @@ def main(opt):
     opt.geometry = geometry
 
     # load the trained model
-    model, device = load_model(opt)
+    model, device = load_model(opt,opt.model_stored_as_dict)
     opt.model = model
     opt.device = device
 
@@ -354,11 +345,12 @@ if __name__=='__main__':
     parser.add_argument('--target_region', action='store', default='')
     parser.add_argument('--conv_layer_depth_info', action='store', type=str, default='')
     parser.add_argument("--apply_mask", action="store_true", default=False)
+    parser.add_argument("--model_stored_as_dict", action="store_true", default=False)
     parser.add_argument('--crop_corners', type=int, action='store', default=0,help='Specify number of pixels to be removed from the edge of the images (to remove edge-effect).')
 
     opt = parser.parse_args()
     main(opt)
-
+#
 # # below code is for trouble-shooting purposes only
 # from types import SimpleNamespace
 #
@@ -373,7 +365,8 @@ if __name__=='__main__':
 #     region_file='',
 #     region_id_field = 'EU_REGION',
 #     target_region='',
-#     conv_layer_depth_info='',
+#     model_stored_as_dict=False,
+#     conv_layer_depth_info='22,33,44,55,44,33,22',
 #     apply_mask=True,
 #     crop_corners=20
 #     )
