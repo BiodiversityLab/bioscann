@@ -17,12 +17,19 @@ def main(opt):
     if not tiff_files:
         raise ValueError("No TIFF files found with the specified pattern.")
 
+    # Output filename
+    output_filename = opt.outfile
+
+    # Append .tiff if not present
+    if not output_filename.lower().endswith('.tiff'):
+        output_filename += '.tiff'
+
     # Create a GDAL VRT file that references the filtered TIFF files
-    vrt_filename = os.path.join(os.path.dirname(opt.outfile),"merged.vrt")
+    vrt_filename = os.path.join(os.path.dirname(output_filename),"merged.vrt")
     gdal.BuildVRT(vrt_filename, tiff_files)
 
     # Convert the VRT to a single TIFF file
-    gdal.Translate(opt.outfile, vrt_filename, format="GTiff",
+    gdal.Translate(output_filename, vrt_filename, format="GTiff",
                    outputType=gdal.GDT_Float32)
 
     # Delete the temporary VRT file
