@@ -232,7 +232,7 @@ def compose_indata(dataset_path, channels, apis, image_name='',target_dir=''):
         try:
             #for training
             if image_name == '':
-                if img.startswith('id'):
+                if os.path.basename(img).startswith('id'):
                     cluster_id = os.path.basename(img).split('-')[1]
                 else:
                     cluster_id = '-'.join(os.path.basename(img).split('-')[-4:]).replace('.tiff','')

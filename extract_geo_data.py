@@ -101,7 +101,6 @@ def create_annotation_and_mask_image(training_dataset_output_path, training_data
             cv2.fillPoly(all_polygons_image, interior_coords, color=(0,0,0)) 
             cv2.fillPoly(annotation_image, interior_coords, color=(0,0,0)) 
 
-
     cluster_id = center_polygon['TARGET_FID']
 
     annotation_image = annotation_image * mask_image
@@ -192,6 +191,7 @@ def do_work(extent_name,json_data,opt,train_annotation_path,testset_instances_di
             success, _ = ir.compose_indata(target_folder_features, channels, apis=ra.apis)
             if success != False:
                 break
+
 def main(opt):
     if opt.logging_off:
         logging.disable(logging.CRITICAL)
@@ -360,20 +360,20 @@ if __name__=='__main__':
     main(opt)
 
 
-# below code is for trouble-shooting purposes only:
+# # below code is for trouble-shooting purposes only:
 # from types import SimpleNamespace
 #
 # opt = SimpleNamespace(
 #     polygon_ids=[],
 #     number_of_polygons=0,
 #     img_size=128,
-#     output_path="data/processed_geodata/alpine/alpine_geodata",
+#     output_path="data/processed_geodata/test/test_geodata",
 #     start_index=5,
 #     testset_size=0.2,
 #     validation_size=0.2,
 #     test_area=[389000, 6752000, 389000, 6757000],
 #     configuration="version_public_sat",
-#     window_coordinates="data/processed_geodata/alpine/cropped_windows",
+#     window_coordinates="data/processed_geodata/test/cropped_windows",
 #     polygons_path='geopackage',
 #     lonlat_features=False,
 #     meters_per_pixel=10,

@@ -68,3 +68,8 @@ python train_model.py \
     --patience 20
 ```
 
+## Merge predictions into one spatial raster
+```commandline
+gdal_merge.py -o merged_predictions.tiff -ot Float32 -v -a_nodata 0 -init 0 output/*.tiff
+```
+
