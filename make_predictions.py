@@ -347,7 +347,6 @@ if __name__=='__main__':
     parser.add_argument("--apply_mask", action="store_true", default=False)
     parser.add_argument("--model_stored_as_dict", action="store_true", default=False)
     parser.add_argument('--crop_corners', type=int, action='store', default=0,help='Specify number of pixels to be removed from the edge of the images (to remove edge-effect).')
-
     opt = parser.parse_args()
     main(opt)
 #
