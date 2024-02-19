@@ -170,25 +170,27 @@ def calculate_binary_precision_recall(annotations: np.array, predictions: np.arr
     rounded_predictions = np.round(predictions)
     # plot_arrays(rounded_predictions)
 
-    # how many pixels are there
-    rounded_predictions[target_pixels].shape[0]
-    # how many pixels are supposed to be 1
-    (annotations[target_pixels] == 1).sum()
-    # how many pixels are supposed to be 0
-    (annotations[target_pixels] == 0).sum()
-    # how many pixels were predicted as 1
-    (rounded_predictions[target_pixels] == 1).sum()
-    # how many pixels were predicted as 0
-    (rounded_predictions[target_pixels] == 0).sum()
-
+    # # how many pixels are there
+    # rounded_predictions[target_pixels].shape[0]
+    # # how many pixels are supposed to be 1
+    # (annotations[target_pixels] == 1).sum()
+    # # how many pixels are supposed to be 0
+    # (annotations[target_pixels] == 0).sum()
+    # # how many pixels were predicted as 1
+    # (rounded_predictions[target_pixels] == 1).sum()
+    # # how many pixels were predicted as 0
+    # (rounded_predictions[target_pixels] == 0).sum()
 
     true_positives = ((rounded_predictions[target_pixels] == 1) & (annotations[target_pixels] == 1)).sum()
     false_positives = ((rounded_predictions[target_pixels] == 1) & (annotations[target_pixels] == 0)).sum()
     false_negatives = ((rounded_predictions[target_pixels] == 0) & (annotations[target_pixels] == 1)).sum()
+    true_negatives = ((rounded_predictions[target_pixels] == 0) & (annotations[target_pixels] == 0)).sum()
 
-    false_pixels = abs(annotations[target_pixels]-rounded_predictions[target_pixels]).sum()
+    false_pixels = false_positives+false_negatives
+    correct_pixels = true_positives+true_negatives
     total_pixels = len(annotations[target_pixels])
-    correct_pixels = total_pixels-false_pixels
+    # false_pixels = abs(annotations[target_pixels]-rounded_predictions[target_pixels]).sum()
+    # correct_pixels = total_pixels-false_pixels
     accuracy = correct_pixels/total_pixels
 
     # Calculate precision, if we have no predicted positives, set precision to 0
@@ -252,6 +254,33 @@ def plot_pred(pred, val_mask, y, store_path, epoch, image_name, val_img_index):
     cv2.imwrite(image_path, con)
     return image_path
 
+
+def count_pixels(indata_folder, outdata_folder):
+    class_a_count = 0  # mask=255, bbox=255
+    class_b_count = 0  # mask=255, bbox=0
+    class_invalid_count = 0  # mask=0
+    for filename in os.listdir(indata_folder):
+        if "_mask.tiff" in filename:
+            mask_path = os.path.join(indata_folder, filename)
+            bbox_path = os.path.join(outdata_folder, filename.replace("_mask", ""))
+            if os.path.exists(bbox_path):
+                mask = plt.imread(mask_path)
+                bbox = plt.imread(bbox_path)
+                class_a_count += np.sum((mask == 255) & (bbox == 255))
+                class_b_count += np.sum((mask == 255) & (bbox == 0))
+                class_invalid_count += np.sum(mask == 0)
+    return class_a_count, class_b_count, class_invalid_count
+
+def weighted_bce_loss(outputs, targets,weight_for_1,weight_for_0):
+    # Calculate the weight for each sample in the batch
+    weights = targets * weight_for_1 + (1 - targets) * weight_for_0
+    # BCELoss
+    bce_loss = nn.BCELoss(reduction='none')
+    loss = bce_loss(outputs, targets)
+    # Apply weights
+    weighted_loss = loss * weights
+    # Return the mean loss
+    return weighted_loss.mean()
 
 def main(opt):
     experiment_path = os.path.join(opt.workdir, "train", opt.experiment_name,opt.n_channels_per_layer)
@@ -351,8 +380,18 @@ def main(opt):
             batch_size=opt.batch_size,
             loss_mask= not opt.no_loss_mask,
         )
+    # get the frequency of each class to adjust class weights
+    target_class_count, non_target_class_count, class_invalid_count = count_pixels(indata,outdata)
 
-    lossFn = nn.BCELoss()
+    weight_for_target_class = 1/(target_class_count/(sum([target_class_count,non_target_class_count])))
+    weight_for_non_target_class = 1/(non_target_class_count/(sum([target_class_count,non_target_class_count])))
+
+    # Assuming your model outputs raw scores, you should use BCEWithLogitsLoss
+    # If your model outputs probabilities (passed through a Sigmoid), use BCELoss
+    # # Create a tensor of weights
+    # weights = torch.tensor([weight_for_non_target_class, weight_for_target_class])
+    # lossFn = nn.BCEWithLogitsLoss(pos_weight=weights)
+    # lossFn = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=opt.learning_rate, betas=(0.5, 0.999))
 
     no_improve_epoch = 0
@@ -361,11 +400,15 @@ def main(opt):
     else:
         patience = opt.patience
     # pdb.set_trace()
+
+    n_batches = math.ceil(sum(1 for file in os.listdir(outdata) if file.endswith('.tiff'))/opt.batch_size)
+    n_batches_val = math.ceil(sum(1 for file in os.listdir(val_outdata) if file.endswith('.tiff'))/opt.batch_size)
     for epoch in range(opt.epochs):
         # torch.enable_grad()
         print("epoch: {}".format(epoch))
         train_loss = 0
         for i, batch in enumerate(mDataloader.train_dataloader):
+            print(f"Processing batch {i}/{n_batches}", end="\r")
             if not opt.no_loss_mask:
                 x, y, mask, image_names = (
                     batch["image"],
@@ -392,7 +435,8 @@ def main(opt):
             #     target_pixels = np.where(mask > 0)
             #     loss = lossFn(pred[target_pixels], y[target_pixels])
             # else:
-            loss = lossFn(pred, y)
+            # loss = lossFn(pred, y)
+            loss = weighted_bce_loss(pred, y, weight_for_target_class, weight_for_non_target_class)
 
             loss.backward()
 
@@ -408,8 +452,8 @@ def main(opt):
         val_binary_accuracy = 0.0
 
         # torch.no_grad()
-
         for i, batch in enumerate(mDataloader.val_dataloader):
+            print(f"Processing validation-batch {i}/{n_batches_val}", end="\r")
             optimizer.zero_grad()
 
             if not opt.no_loss_mask:
@@ -439,7 +483,9 @@ def main(opt):
             #     target_pixels = np.where(mask > 0)
             #     loss = lossFn(val_pred[target_pixels], val_y[target_pixels])
             # else:
-            loss = lossFn(val_pred, val_y)
+            # loss = lossFn(val_pred, val_y)
+            loss = weighted_bce_loss(val_pred, val_y, weight_for_target_class, weight_for_non_target_class)
+
             # Calculate precision and recall
             # batch_val_precision, batch_val_recall = calculate_precision_recall(val_y, val_pred)
             # val_precision += batch_val_precision.cpu().detach().numpy()
@@ -483,14 +529,14 @@ def main(opt):
                     output_val_image(val_pred,val_mask,val_x,val_y,experiment_path,epoch,val_image_names,val_img_index)
 
 
-        max_loss_value = 0.1 # scale loss to also be roughly between 0 and 1 as all other metrics
-        scaled_val_loss = val_loss/mDataloader.val_dataloader.__len__() / max_loss_value
+        # max_loss_value = 0.1 # scale loss to also be roughly between 0 and 1 as all other metrics
+        # scaled_val_loss = val_loss/mDataloader.val_dataloader.__len__() / max_loss_value
         # Calculate F1 score
         val_f1 = f1_score(val_binary_precision/mDataloader.val_dataloader.__len__(), val_binary_recall/mDataloader.val_dataloader.__len__())
         # Update the scoring formula to include F1
-        current_score = float(val_binary_accuracy) / mDataloader.val_dataloader.__len__() \
-                        + val_f1 \
-                        - scaled_val_loss
+        # current_score = float(val_binary_accuracy) / mDataloader.val_dataloader.__len__() \
+        #                 + val_f1 \
+        #                 - scaled_val_loss
         # current_score = (val_binary_accuracy/mDataloader.val_dataloader.__len__() +
         #                  val_binary_precision/mDataloader.val_dataloader.__len__() +
         #                  val_binary_recall/mDataloader.val_dataloader.__len__() -
@@ -526,27 +572,27 @@ def main(opt):
                 float(val_binary_accuracy) / mDataloader.val_dataloader.__len__(), step=epoch
             )
             mlflow.log_metric(
-                "val_score",
-                float(current_score), step=epoch
+                "val_binary_F1",
+                float(val_f1), step=epoch
             )
 
         print(
-            "epoch: {}, train_loss: {}, val_loss: {}, val_binary precision: {}, val_binary recall: {}, val_binary accuracy: {}, val_score: {}".format(
+            "epoch: {}, train_loss: {}, val_loss: {}, val_binary precision: {}, val_binary recall: {}, val_binary accuracy: {}, val_binary_F1: {}".format(
                 epoch,
-                loss/mDataloader.val_dataloader.__len__(),
+                train_loss/mDataloader.val_dataloader.__len__(),
                 val_loss/mDataloader.val_dataloader.__len__(),
                 val_binary_precision/mDataloader.val_dataloader.__len__(),
                 val_binary_recall/mDataloader.val_dataloader.__len__(),
                 val_binary_accuracy/mDataloader.val_dataloader.__len__(),
-                current_score
+                val_f1
             )
         )
-        # set the best_score to the score of the first epoch
+        # set the lowest_loss to the loss of the first epoch
         if epoch==0:
-            best_score = current_score
+            lowest_loss = val_loss
 
-        if current_score > best_score:
-            best_score = current_score
+        if val_loss < lowest_loss:
+            lowest_loss = val_loss
             no_improve_epoch = 0
             # Save the best model
             torch.save(
@@ -648,13 +694,13 @@ if __name__ == "__main__":
     if opt.mlflow:
         mlflow.end_run()
 
-
-# below code is for trouble-shooting purposes only
-
+#
+# # below code is for trouble-shooting purposes only
+#
 # from types import SimpleNamespace
 # # Replace 'example_region' and 'example_configuration' with actual values
 # region = 'alpine'
-# configuration = '22,11,5'
+# configuration = '20,10,20'
 #
 # opt = SimpleNamespace(
 #     epochs=100,
@@ -680,4 +726,4 @@ if __name__ == "__main__":
 #     n_coefficients_per_upsampling_layer=None,
 #     patience=20
 # )
-#
+
