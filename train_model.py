@@ -2,6 +2,7 @@ import argparse
 import errno
 import math
 import os
+import copy
 import pdb
 from locale import normalize
 
@@ -604,8 +605,12 @@ def main(opt):
             torch.save(
                 model.state_dict(), os.path.join(experiment_path, "best_model_state_dict.pth")
             )
+            # Create a deep copy of the model
+            model_cpu = copy.deepcopy(model)
+            # Move the copied model to CPU
+            model_cpu.to('cpu')
             torch.save(
-                model, os.path.join(experiment_path, "best_model.pth")
+                model_cpu, os.path.join(experiment_path, "best_model.pth")
             )
 
             if opt.mlflow:
@@ -624,8 +629,12 @@ def main(opt):
                 model.state_dict(),
                 os.path.join(experiment_path, "epoch_{}_loss_{}_state_dict.pth".format(epoch, loss)),
             )
+            # Create a deep copy of the model
+            model_cpu = copy.deepcopy(model)
+            # Move the copied model to CPU
+            model_cpu.to('cpu')
             torch.save(
-                model,
+                model_cpu,
                 os.path.join(experiment_path, "epoch_{}_loss_{}.pth".format(epoch, loss)),
             )
             if opt.mlflow:
@@ -634,17 +643,19 @@ def main(opt):
                     "weights",
                 )
 
-
-
     torch.save(model.state_dict(), os.path.join(experiment_path, "model_state_dict.pth"))
-    torch.save(model, os.path.join(experiment_path, "model.pth"))
+    # Create a deep copy of the model
+    model_cpu = copy.deepcopy(model)
+    # Move the copied model to CPU
+    model_cpu.to('cpu')
+    torch.save(model_cpu, os.path.join(experiment_path, "model.pth"))
     if opt.mlflow:
         mlflow.log_artifact(os.path.join(experiment_path, "model_state_dict.pth"), "weights")
     
     if opt.test_dataset:
-        model.load_state_dict(torch.load(os.path.join(experiment_path, "best_model_state_dict.pth"),map_location=device))
+        model_cpu.load_state_dict(torch.load(os.path.join(experiment_path, "best_model_state_dict.pth"),map_location=device))
         opt.dataset = opt.test_dataset
-        test.main(opt, init=False, model=model)
+        test.main(opt, init=False, model=model_cpu)
 
 if __name__ == "__main__":
 
