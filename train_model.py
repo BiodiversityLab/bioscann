@@ -303,9 +303,13 @@ def main(opt):
     # device = 'cpu'
     # print(device)
     if opt.device != "cpu":
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        try:
+            device = torch.device("mps")
+        except:
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     else:
         device = torch.device("cpu")
+    print(device)
     if str(opt.algorithm).lower() == "attentionpixelclassifier":
         model = attentionPixelClassifier.AttentionPixelClassifier(
             input_numChannels=opt.input_channels[0],
