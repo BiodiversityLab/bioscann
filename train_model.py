@@ -302,11 +302,10 @@ def main(opt):
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # device = 'cpu'
     # print(device)
-    if opt.device != "cpu":
-        try:
-            device = torch.device("mps")
-        except:
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if opt.device == "gpu":
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    elif opt.device =='mps':
+        device = torch.device("mps")
     else:
         device = torch.device("cpu")
     print(device)
