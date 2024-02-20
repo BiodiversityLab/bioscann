@@ -157,14 +157,17 @@ def calculate_binary_precision_recall_new(annotations: np.array, predictions: np
 
 
 
-def calculate_binary_precision_recall(annotations: np.array, predictions: np.array, mask:np.array) -> tuple:
+def calculate_binary_precision_recall(annotations: np.array, predictions: np.array, mask) -> tuple:
     """Calculate binary precision by rounding the predictions to 0 or 1 before calculation."""
+    tensor_on_cpu = mask.cpu()
+    mask_np = tensor_on_cpu.numpy()
+
     if annotations.shape != predictions.shape:
         raise ValueError("Predicted and actual tensors must have the same shape.")
     # plot_arrays(mask)
     # plot_arrays(annotations)
     # plot_arrays(predictions)
-    target_pixels = np.where(mask > 0)
+    target_pixels = np.where(mask_np > 0)
 
     # round the predictions to be binary
     rounded_predictions = np.round(predictions)
