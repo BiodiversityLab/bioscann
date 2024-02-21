@@ -23,13 +23,12 @@ def check_file(filename, folder_path, geom):
     return None
 
 
-def find_overlapping_files(folder_path, cropping_window):
+def find_overlapping_files(folder_path, geom):
     overlapping_files = []
     for filename in os.listdir(folder_path):
-        if filename.endswith('.tiff'):
-            coords = list(map(int, re.findall(r'\d+', filename)[-4:]))  # x_min, y_min, x_max, y_max
-            if overlaps(cropping_window, coords):
-                overlapping_files.append(filename)
+        result = check_file(filename, folder_path, geom)
+        if result:
+            overlapping_files.append(result)
     return overlapping_files
 
 
