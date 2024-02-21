@@ -121,41 +121,41 @@ def plot_arrays(mask):
     plt.tight_layout()
     plt.show()
 
-def calculate_binary_precision_recall_new(annotations: np.array, predictions: np.array, mask: np.array) -> tuple:
-    """Calculate binary precision by rounding the predicitons to 0 or 1 before calculation."""
-
-    if annotations.shape != predictions.shape:
-        raise ValueError("Predicted and actual tensors must have the same shape.")
-    # plot_arrays(mask)
-    # plot_arrays(annotations)
-    # plot_arrays(predictions)
-    target_pixels = np.where(mask > 0)
-
-    # round the predictions to be binary
-    rounded_predictions = np.round(predictions)
-    # plot_arrays(rounded_predictions)
-
-    # Identify target pixels
-    target_pixels = mask > 0
-
-    # Flatten the tensors and apply the mask
-    preds_flat = rounded_predictions.flatten()
-    actuals_flat = annotations.flatten()
-    target_pixels_flat = target_pixels.flatten()
-
-    # Apply the mask to select only the target pixels
-    preds_target = preds_flat[target_pixels_flat]
-    actuals_target = actuals_flat[target_pixels_flat]
-
-    # Calculate accuracy for target pixels
-    correct_predictions = (preds_target == actuals_target).sum()
-    total_target_predictions = preds_target.size
-
-    if total_target_predictions == 0:
-        raise ValueError("No target pixels found in the mask.")
-
-    accuracy = correct_predictions / total_target_predictions
-
+# def calculate_binary_precision_recall_new(annotations: np.array, predictions: np.array, mask: np.array) -> tuple:
+#     """Calculate binary precision by rounding the predicitons to 0 or 1 before calculation."""
+#
+#     if annotations.shape != predictions.shape:
+#         raise ValueError("Predicted and actual tensors must have the same shape.")
+#     # plot_arrays(mask)
+#     # plot_arrays(annotations)
+#     # plot_arrays(predictions)
+#     target_pixels = np.where(mask > 0)
+#
+#     # round the predictions to be binary
+#     rounded_predictions = np.round(predictions)
+#     # plot_arrays(rounded_predictions)
+#
+#     # Identify target pixels
+#     target_pixels = mask > 0
+#
+#     # Flatten the tensors and apply the mask
+#     preds_flat = rounded_predictions.flatten()
+#     actuals_flat = annotations.flatten()
+#     target_pixels_flat = target_pixels.flatten()
+#
+#     # Apply the mask to select only the target pixels
+#     preds_target = preds_flat[target_pixels_flat]
+#     actuals_target = actuals_flat[target_pixels_flat]
+#
+#     # Calculate accuracy for target pixels
+#     correct_predictions = (preds_target == actuals_target).sum()
+#     total_target_predictions = preds_target.size
+#
+#     if total_target_predictions == 0:
+#         raise ValueError("No target pixels found in the mask.")
+#
+#     accuracy = correct_predictions / total_target_predictions
+#
 
 
 def calculate_binary_precision_recall(annotations: np.array, predictions: np.array, mask) -> tuple:
