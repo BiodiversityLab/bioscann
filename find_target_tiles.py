@@ -4,6 +4,7 @@ import argparse
 import geopandas as gpd
 from shapely.geometry import box
 import concurrent.futures
+import threading
 import shutil
 
 
@@ -32,14 +33,26 @@ def find_overlapping_files(folder_path, geom):
     return overlapping_files
 
 
-def copy_files(files, dst_folder):
+def copy_file(source, destination, lock, counter, update_interval=10000):
+    shutil.copy(source, destination)
+    with lock:
+        counter['count'] += 1
+        if counter['count'] % update_interval == 0:
+            print(f"Copied {counter['count']} files...")
+
+
+def copy_files_parallel(files, dst_folder):
     os.makedirs(dst_folder, exist_ok=True)
-    total_n_files = len(files)
-    print("Copying %i target tiff-files into output folder"%total_n_files)
-    for i, file in enumerate(files):
-        shutil.copy(file, dst_folder)
-        if i % 10000 == 0:
-            print("Copied %i of %i files" % (i, total_n_files))
+    lock = threading.Lock()
+    counter = {'count': 0}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for file in files:
+            future = executor.submit(copy_file, file, dst_folder, lock, counter)
+            futures.append(future)
+        for future in concurrent.futures.as_completed(futures):
+            pass  # Handle exceptions or additional logging here
+    print(f"Total {counter['count']} files copied.")
 
 
 def main(opt):
