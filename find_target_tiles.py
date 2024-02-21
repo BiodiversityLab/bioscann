@@ -68,7 +68,7 @@ def main(opt):
     #     print(file)
     # Copy the overlapping files to the output folder
     if overlapping_files:
-        copy_files(overlapping_files, opt.output_folder)
+        copy_files_parallel(overlapping_files, opt.output_folder)
         print(f"Copied {len(overlapping_files)} files to {opt.output_folder}")
 
 
