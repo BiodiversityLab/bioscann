@@ -23,15 +23,13 @@ def check_file(filename, folder_path, geom):
     return None
 
 
-def find_overlapping_files(folder_path, geom):
+def find_overlapping_files(folder_path, cropping_window):
     overlapping_files = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(check_file, filename, folder_path, geom)
-                   for filename in os.listdir(folder_path)]
-        for future in concurrent.futures.as_completed(futures):
-            result = future.result()
-            if result:
-                overlapping_files.append(result)
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.tiff'):
+            coords = list(map(int, re.findall(r'\d+', filename)[-4:]))  # x_min, y_min, x_max, y_max
+            if overlaps(cropping_window, coords):
+                overlapping_files.append(filename)
     return overlapping_files
 
 
@@ -48,12 +46,10 @@ def main(opt):
         polygon_geom = gdf.unary_union
     else:
         polygon_geom = box(opt.x_min, opt.y_min, opt.x_max, opt.y_max)
-
     overlapping_files = find_overlapping_files(opt.folder_path, polygon_geom)
     print("Overlapping files:")
     for file in overlapping_files:
         print(file)
-
     # Copy the overlapping files to the output folder
     if overlapping_files:
         copy_files(overlapping_files, opt.output_folder)
@@ -70,11 +66,8 @@ if __name__ == '__main__':
     parser.add_argument('--y_min', type=int, help='Minimum Y coordinate of the cropping window')
     parser.add_argument('--x_max', type=int, help='Maximum X coordinate of the cropping window')
     parser.add_argument('--y_max', type=int, help='Maximum Y coordinate of the cropping window')
-
     opt = parser.parse_args()
-
     # Check if either polygon file or coordinates are provided
     if not opt.polygon_file and (opt.x_min is None or opt.y_min is None or opt.x_max is None or opt.y_max is None):
         parser.error("Either --polygon_file or coordinates (--x_min, --y_min, --x_max, --y_max) must be provided.")
-
     main(opt)
