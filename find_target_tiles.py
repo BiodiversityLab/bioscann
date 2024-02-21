@@ -46,9 +46,9 @@ def main(opt):
     else:
         polygon_geom = box(opt.x_min, opt.y_min, opt.x_max, opt.y_max)
     overlapping_files = find_overlapping_files(opt.folder_path, polygon_geom)
-    print("Overlapping files:")
-    for file in overlapping_files:
-        print(file)
+    # print("Overlapping files:")
+    # for file in overlapping_files:
+    #     print(file)
     # Copy the overlapping files to the output folder
     if overlapping_files:
         copy_files(overlapping_files, opt.output_folder)
