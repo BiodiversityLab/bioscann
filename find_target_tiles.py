@@ -35,6 +35,7 @@ def find_overlapping_files(folder_path, geom):
 def copy_files(files, dst_folder):
     os.makedirs(dst_folder, exist_ok=True)
     total_n_files = len(files)
+    print("Copying %i target tiff-files into output folder"%total_n_files)
     for i, file in enumerate(files):
         shutil.copy(file, dst_folder)
         if i % 10000 == 0:
