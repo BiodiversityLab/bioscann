@@ -34,8 +34,11 @@ def find_overlapping_files(folder_path, geom):
 
 def copy_files(files, dst_folder):
     os.makedirs(dst_folder, exist_ok=True)
-    for file in files:
+    total_n_files = len(files)
+    for i, file in enumerate(files):
         shutil.copy(file, dst_folder)
+        if i % 10000 == 0:
+            print("Copied %i of %i files" % (i, total_n_files))
 
 
 def main(opt):
