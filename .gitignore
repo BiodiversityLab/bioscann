@@ -171,3 +171,4 @@ processed_geodata/
 mlruns/
 train/
 predictions/
+prediction_geodata/
