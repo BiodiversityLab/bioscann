@@ -442,9 +442,11 @@ def main(opt):
             #     target_pixels = np.where(mask > 0)
             #     loss = lossFn(pred[target_pixels], y[target_pixels])
             # else:
-            # loss = lossFn(pred, y)
-            loss = weighted_bce_loss(pred, y, weight_for_target_class, weight_for_non_target_class)
-
+            if opt.regular_loss:
+                lossFn = nn.BCELoss()
+                loss = lossFn(pred, y)
+            else:
+                loss = weighted_bce_loss(pred, y, weight_for_target_class, weight_for_non_target_class)
             loss.backward()
 
             optimizer.step()
@@ -491,7 +493,11 @@ def main(opt):
             #     loss = lossFn(val_pred[target_pixels], val_y[target_pixels])
             # else:
             # loss = lossFn(val_pred, val_y)
-            loss = weighted_bce_loss(val_pred, val_y, weight_for_target_class, weight_for_non_target_class)
+            if opt.regular_loss:
+                lossFn = nn.BCELoss()
+                loss = lossFn(val_pred, val_y)
+            else:
+                loss = weighted_bce_loss(val_pred, val_y, weight_for_target_class, weight_for_non_target_class)
 
             # Calculate precision and recall
             # batch_val_precision, batch_val_recall = calculate_precision_recall(val_y, val_pred)
@@ -683,6 +689,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_channels_per_layer", action="store", default="20,10,5,10,20", help='ex: 20,10,5,10,20')
     parser.add_argument("--n_coefficients_per_upsampling_layer", action="store", default=None, help='ex: 4,4    Note: Must be the correct number of values corresponding to the upsampling layers, i.e. N_values = (len(n_channels_per_layer)/2) - 1')
     parser.add_argument("--patience", type=int, default=None, help="Patience for early stopping (number of epochs to wait without improvement)")
+    parser.add_argument("--regular_loss", action="store_true", default=False, help="Activate this flag to turn off the default weighed loss and instead implement a standard (un-weighed) BCEloss function.")
     opt = parser.parse_args()
 
     if opt.mlflow:
