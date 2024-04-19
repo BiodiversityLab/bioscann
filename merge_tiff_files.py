@@ -51,7 +51,7 @@ if __name__=='__main__':
 # from types import SimpleNamespace
 #
 # opt = SimpleNamespace(
-#     input_folder='data/prediction_geodata/test',
-#     outfile='merged_tiffs.tiff',
-#     filename_pattern='treeheight-'
+#     input_folder='predictions/alpine/predictions',
+#     outfile='predictions/alpine/merged_predictions_alpine.tiff',
+#     filename_pattern=''
 # )
