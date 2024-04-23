@@ -8,12 +8,46 @@ import numpy as np
 # Set the global font to Arial
 matplotlib.rcParams['font.family'] = 'Arial'
 
-model_testing = True
-training_history = False
-
 # Initialize the MLflow client
 client = MlflowClient()
 # mlflow.set_tracking_uri('your_tracking_uri')
+
+
+model_testing = False
+training_history = True
+
+if training_history: # pick a run_id
+    # # boreal_east
+    # run_id = '1810ee63cf3544f7beffb7e465f15536'
+    # # boreal_south
+    # run_id = '1874024118f14411aad13ed9b5b120a3'
+    # # boreal_northwest
+    # run_id = '4e3f21d8bcbe4c5b8f11111630b91695'
+    # # alpine
+    # run_id = '7779d3583c8a418f93e798e058c3993f'
+    # # continental
+    # run_id = '94b233e5b1d541cbba7a980f74ad71de'
+    # # boreal south regular loss batchsize 50
+    # run_id = '91655c64c5b54a66b1944a8e541d59a3'
+    # # boreal south regular loss batchsize 5
+    # run_id = 'a3277f8551b34ba79d54d38e7e1e37af'
+    # # regular loss function
+    # run_id = '4fdd6eda52a1489faf88eb413a59ee48'
+
+    # # boreal south batchsize 5
+    # run_id = 'd2ea3db2c2f04c09b99718baf55d1326'
+    # # boreal east batchsize 5
+    # run_id = '8976be82eec04296b88340372b5b1070'
+    # boreal northwest batchsize 5
+    run_id = '4b9420f09bd44d7bb86bda21ae25e3da'
+    # # alpine batchsize 5
+    # run_id = '30a2fb4fe17d4473afa37d924f71ad71'
+    # # continental batchsize 5
+    # run_id = '94b233e5b1d541cbba7a980f74ad71de'
+
+    run = client.get_run(run_id)  # Retrieve the run from MLflow
+    print(run.info.status)
+
 
 if not training_history:
     # #Specify the experiment ID or name
@@ -130,7 +164,7 @@ if not training_history:
         plt.grid(axis='y', linestyle='-', alpha=0.7, zorder=0)
 
         # Save the plot to a PDF file
-        plt.savefig('results/grouped_metrics_plot.pdf', bbox_inches='tight')
+        plt.savefig('results/grouped_metrics_plot_validation_set.pdf', bbox_inches='tight')
 
         plt.show()
 
@@ -140,7 +174,7 @@ if not training_history:
         output_df[float_cols] = output_df[float_cols].round(3)
         output_df.values
         # write to file
-        output_df.to_csv('results/regional_model_scores.txt',sep='\t',index=False)
+        output_df.to_csv('results/regional_model_scores_validation_set.txt',sep='\t',index=False)
 
     #
     # # Also select the training history of selected runs
@@ -167,18 +201,6 @@ if not training_history:
 
 else:
 
-
-    # boreal_east
-    run_id = '1810ee63cf3544f7beffb7e465f15536'
-    # boreal_south
-    run_id = '1874024118f14411aad13ed9b5b120a3'
-    # boreal_northwest
-    run_id = '4e3f21d8bcbe4c5b8f11111630b91695'
-    # alpine
-    run_id = '7779d3583c8a418f93e798e058c3993f'
-    # continental
-    run_id = '94b233e5b1d541cbba7a980f74ad71de'
-
     # Retrieve metric history for both 'train_loss' and 'val_loss'
     def get_metric_history(run_id, metric_name):
         return client.get_metric_history(run_id, metric_name)
@@ -204,6 +226,4 @@ else:
     plt.show()
 
 
-    # regular loss function
-    run_id = '4fdd6eda52a1489faf88eb413a59ee48'
 

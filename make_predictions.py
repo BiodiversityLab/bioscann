@@ -112,7 +112,7 @@ def read_geotiff(filename):
     band = ds.GetRasterBand(1)
     arr = band.ReadAsArray()
     return arr, ds
-    
+
 def write_geotiff(filename, arr, in_ds, image_scale, crop_corners):
    # pdb.set_trace()
     #gdal.SetConfigOption('GTIFF_SRS_SOURCE', 'EPSG')
@@ -200,7 +200,7 @@ def process_tile(args):
                 mask_image = mi.create_filter_mask(land_cover_data_layer, mask_image, opt.json_data[opt.configuration]['prediction_masks'][0])
                 pred = pred*mask_image
 
-            pred = pred.round(decimals=4)
+            pred = pred.round(decimals=8)
             if opt.crop_corners > 0:
                 x=opt.crop_corners
                 pred = pred[x:-x, x:-x]
@@ -355,9 +355,9 @@ if __name__=='__main__':
 #
 # opt = SimpleNamespace(
 #     geodata_folder='data/prediction_geodata/test',
-#     output_path='predictions',
+#     output_path='predictions/test_area_batchsize_5',
 #     outfile_stem='prediction',
-#     trained_model='train/boreal_northwest/20,30,40,30,20/best_model.pth',
+#     trained_model='train/modeltesting_models/100,50,100_5_weighted_loss.pth',
 #     configuration='version_public_sat',
 #     device='0',
 #     threads=10,
@@ -365,7 +365,7 @@ if __name__=='__main__':
 #     region_id_field = 'EU_REGION',
 #     target_region='',
 #     model_stored_as_dict=False,
-#     conv_layer_depth_info='22,33,44,55,44,33,22',
+#     conv_layer_depth_info='',
 #     apply_mask=True,
 #     crop_corners=20
 #     )

@@ -121,12 +121,26 @@ def calculate_stats(prediction, mask_image, label_image, target_class_threshold)
         total_pixels.append(len(valid_labels))
     return (true_positives, true_negatives, false_positives, false_negatives, total_pixels, target_thresholds)
 
-def load_instance_and_calculate_stats(args_list):
-    instance, files, model, target_class_threshold, i, total_instances = args_list
+def load_instance_tifffiles(files):
     features_file, mask_file, label_file = files
     # load feature data
     feature_image = imread(features_file)
     feature_image = feature_image / 255.0
+    # load mask
+    mask_image = imread(mask_file)
+    mask_image = mask_image / 255.0
+    # plot_image(mask_image)
+    # load label
+    label_image = imread(label_file)
+    label_image = label_image / 255.0
+    # plot_image(label_image)
+    return (feature_image,mask_image,label_image)
+
+
+def load_instance_and_calculate_stats(args_list):
+    instance, files, model, target_class_threshold, i, total_instances = args_list
+    feature_image, mask_image, label_image = load_instance_tifffiles(files)
+    # prepare feature image for input in model
     feature_image = feature_image.transpose(2, 0, 1)
     feature_image = torch.from_numpy(feature_image).to(torch.device("cpu"))
     feature_image = feature_image[None, ...]
@@ -136,14 +150,7 @@ def load_instance_and_calculate_stats(args_list):
     prediction = prediction.cpu().detach().numpy()
     prediction = prediction[0, 0, :, :]
     # plot_image(prediction)
-    # load mask
-    mask_image = imread(mask_file)
-    mask_image = mask_image / 255.0
-    # plot_image(mask_image)
-    # load label
-    label_image = imread(label_file)
-    label_image = label_image / 255.0
-    # plot_image(label_image)
+
     pixel_labels, pixel_preds = compile_labels_and_predictions_per_pixel(prediction, mask_image, label_image)
     #true_positives, true_negatives, false_positives, false_negatives, total_pixels, target_thresholds = calculate_stats(prediction, mask_image, label_image, target_class_threshold)
     print(f'\rFinished instance %i/%i' %(i,total_instances), end='', flush=True)
@@ -167,40 +174,7 @@ def calculate_metrics_for_threshold(all_labels, all_preds, threshold):
             correct_pixels,
             accuracy, precision, recall, f1_score]
 
-
-def main(opt):
-
-    if not os.path.exists(os.path.dirname(opt.output_file)):
-        os.makedirs(os.path.dirname(opt.output_file))
-
-    # load the model
-    model = torch.load(opt.trained_model_path)
-    # model.eval()
-
-    # load the test instances
-    file_dict = get_file_dict(opt.input_folder) # order of files for each key is: feature, mask, label
-    file_dict = check_complete_instances(file_dict)
-
-    # #two lines below are for testing
-    # from itertools import islice
-    # file_dict = dict(islice(file_dict.items(), 1000))
-
-    total_instances = len(file_dict.keys())
-
-    if opt.cores > 1:
-        print("Running in parallel on %i cores."%opt.cores)
-        # Function to be executed in the pool
-        # Using ProcessPoolExecutor to parallelize the loop
-        with concurrent.futures.ProcessPoolExecutor(max_workers=opt.cores) as executor:
-            # Submit all tasks to the executor
-            futures = [executor.submit(load_instance_and_calculate_stats, [instance, file_dict[instance], model, opt.target_class_threshold, i, total_instances]) for i, instance in enumerate(file_dict.keys())]
-
-            # Collect results as they complete
-            stats_list = [future.result() for future in concurrent.futures.as_completed(futures)]
-    else:
-        stats_list = [load_instance_and_calculate_stats([instance, file_dict[instance], model, opt.target_class_threshold, i, total_instances]) for i, instance in enumerate(file_dict.keys())]
-
-    print()  # Move to the next line after the loop completes
+def produce_df_from_test_stats(stats_list):
     label_list = []
     pred_list = []
     for i in stats_list:
@@ -230,7 +204,45 @@ def main(opt):
     for threshold in np.arange(0, 1.01, 0.01):
         stats = calculate_metrics_for_threshold(all_labels, all_preds, threshold)
         df_stats = pd.concat([df_stats, pd.DataFrame([stats], columns=columns)])
+    return df_stats
 
+
+
+def main(opt):
+
+    if not os.path.exists(os.path.dirname(opt.output_file)):
+        os.makedirs(os.path.dirname(opt.output_file))
+
+    # load the model
+    model = torch.load(opt.trained_model_path)
+    # model.eval()
+
+    # load the test instances
+    file_dict = get_file_dict(opt.input_folder) # order of files for each key is: feature, mask, label
+    file_dict = check_complete_instances(file_dict)
+
+    # #two lines below are for testing
+    # from itertools import islice
+    # file_dict = dict(islice(file_dict.items(), 100))
+
+    total_instances = len(file_dict.keys())
+
+    if opt.cores > 1:
+        print("Running in parallel on %i cores."%opt.cores)
+        # Function to be executed in the pool
+        # Using ProcessPoolExecutor to parallelize the loop
+        with concurrent.futures.ProcessPoolExecutor(max_workers=opt.cores) as executor:
+            # Submit all tasks to the executor
+            futures = [executor.submit(load_instance_and_calculate_stats, [instance, file_dict[instance], model, opt.target_class_threshold, i, total_instances]) for i, instance in enumerate(file_dict.keys())]
+
+            # Collect results as they complete
+            stats_list = [future.result() for future in concurrent.futures.as_completed(futures)]
+    else:
+        stats_list = [load_instance_and_calculate_stats([instance, file_dict[instance], model, opt.target_class_threshold, i, total_instances]) for i, instance in enumerate(file_dict.keys())]
+
+    print()  # Move to the next line after the loop completes
+
+    df_stats = produce_df_from_test_stats(stats_list)
     # Save the DataFrame to CSV
     df_stats = df_stats.round(4)
     df_stats.to_csv(opt.output_file, index=False)
@@ -248,7 +260,7 @@ if __name__ == '__main__':
     main(opt)
 
 
-
+#
 # from types import SimpleNamespace
 #
 # # Hardcoded options for troubleshooting purposes
