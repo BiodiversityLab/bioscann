@@ -38,12 +38,17 @@ if training_history: # pick a run_id
     # run_id = 'd2ea3db2c2f04c09b99718baf55d1326'
     # # boreal east batchsize 5
     # run_id = '8976be82eec04296b88340372b5b1070'
-    # boreal northwest batchsize 5
-    run_id = '4b9420f09bd44d7bb86bda21ae25e3da'
+    # # boreal northwest batchsize 5
+    # run_id = '4b9420f09bd44d7bb86bda21ae25e3da'
     # # alpine batchsize 5
     # run_id = '30a2fb4fe17d4473afa37d924f71ad71'
     # # continental batchsize 5
     # run_id = '94b233e5b1d541cbba7a980f74ad71de'
+
+    # boreal all batchsize 5
+    run_id = '77f0751be2694bcabb7e0ee74cfbaf06'
+    # # sweden all batchsize 5
+    # run_id = 'ab55f164d4d74f7ba00c66e28c9fc094'
 
     run = client.get_run(run_id)  # Retrieve the run from MLflow
     print(run.info.status)

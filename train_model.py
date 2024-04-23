@@ -268,8 +268,8 @@ def count_pixels(indata_folder, outdata_folder):
             mask_path = os.path.join(indata_folder, filename)
             bbox_path = os.path.join(outdata_folder, filename.replace("_mask", ""))
             if os.path.exists(bbox_path):
-                mask = plt.imread(mask_path)
-                bbox = plt.imread(bbox_path)
+                mask = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
+                bbox = cv2.imread(bbox_path, cv2.IMREAD_UNCHANGED)
                 class_a_count += np.sum((mask == 255) & (bbox == 255))
                 class_b_count += np.sum((mask == 255) & (bbox == 0))
                 class_invalid_count += np.sum(mask == 0)

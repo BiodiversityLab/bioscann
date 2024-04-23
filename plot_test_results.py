@@ -43,15 +43,6 @@ def read_test_stats_from_csv_files(directory,threshold,extract_best_threshold):
     return output_df
 
 
-
-
-
-
-
-
-
-
-
 test_stat_file = 'results/test_stats/boreal_south_batchsize_5_testset.csv'
 df = pd.read_csv(test_stat_file)
 
