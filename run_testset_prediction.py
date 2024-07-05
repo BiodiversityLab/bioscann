@@ -72,9 +72,16 @@ def check_complete_instances(file_dict):
         print("All entries have complete files.")
     return file_dict  # Optionally return the modified dictionary
 
-def compile_labels_and_predictions_per_pixel(prediction, mask_image, label_image):
+def compile_labels_and_predictions_per_pixel(prediction, mask_image, label_image, no_data_value = None, remove_no_data_pixels = True):
     valid_preds = prediction[mask_image > 0]
     valid_labels = label_image[mask_image > 0]
+    if no_data_value:
+        if remove_no_data_pixels:
+            valid_labels = valid_labels[valid_preds != no_data_value]
+            valid_preds = valid_preds[valid_preds != no_data_value]
+        else:
+            # code the pixels where we have the no-data value in the prediction raster to nan
+            valid_preds[valid_preds == no_data_value] = np.nan
     return(valid_labels, valid_preds)
 
 def calc_auc_threshold(labels, preds):
@@ -174,19 +181,27 @@ def calculate_metrics_for_threshold(all_labels, all_preds, threshold):
             correct_pixels,
             accuracy, precision, recall, f1_score]
 
-def produce_df_from_test_stats(stats_list):
-    label_list = []
-    pred_list = []
-    for i in stats_list:
-        label_list.append(i[0])
-        pred_list.append(i[1])
-    all_labels = np.concatenate(label_list)
-    all_preds = np.concatenate(pred_list)
+def produce_df_from_test_stats(all_labels_in,all_preds_in):
+    all_labels = all_labels_in.copy()
+    all_preds = all_preds_in.copy()
+    # sum(np.isnan(all_preds)) / len(all_preds)
+    # Check where predictions are NaN
+    nan_indices = np.isnan(all_preds)
+    # # For NaN predictions, set to 0 where label is 1, and 1 where label is 0, to treat them as false predictions
+    # all_preds[nan_indices] = 1 - all_labels[nan_indices]
+    # replace the nan pixels with random values, as we have no information for them
+    np.random.seed(1234)
+    all_preds[nan_indices] = np.random.random(sum(nan_indices))
+    # plt.hist(all_preds, 99)
 
     # Assuming precision_list, recall_list, thresholds_list are defined as in your snippet
     precision_list, recall_list, thresholds_list = precision_recall_curve(all_labels, all_preds)
     f1_list = 2 * (precision_list * recall_list) / (precision_list + recall_list)
-    best_threshold_index = np.argmax(precision_list*recall_list)
+    # Find the maximum value ignoring NaNs
+    max_f1 = np.nanmax(f1_list)
+    # Find the index of the maximum value
+    best_threshold_index = np.where(f1_list == max_f1)[0][0]  # np.where returns a tuple of arrays, one for each dimension
+    # best_threshold_index = np.argmax(f1_list)
     best_threshold = thresholds_list[best_threshold_index]
 
     # Calculate AUC for Precision-Recall Curve
@@ -207,7 +222,6 @@ def produce_df_from_test_stats(stats_list):
     return df_stats
 
 
-
 def main(opt):
 
     if not os.path.exists(os.path.dirname(opt.output_file)):
@@ -220,6 +234,7 @@ def main(opt):
     # load the test instances
     file_dict = get_file_dict(opt.input_folder) # order of files for each key is: feature, mask, label
     file_dict = check_complete_instances(file_dict)
+    sorted_keys = sorted(file_dict.keys())
 
     # #two lines below are for testing
     # from itertools import islice
@@ -233,20 +248,33 @@ def main(opt):
         # Using ProcessPoolExecutor to parallelize the loop
         with concurrent.futures.ProcessPoolExecutor(max_workers=opt.cores) as executor:
             # Submit all tasks to the executor
-            futures = [executor.submit(load_instance_and_calculate_stats, [instance, file_dict[instance], model, opt.target_class_threshold, i, total_instances]) for i, instance in enumerate(file_dict.keys())]
+            futures = [executor.submit(load_instance_and_calculate_stats, [instance, file_dict[instance], model, opt.target_class_threshold, i, total_instances]) for i, instance in enumerate(sorted_keys)]
 
             # Collect results as they complete
             stats_list = [future.result() for future in concurrent.futures.as_completed(futures)]
     else:
-        stats_list = [load_instance_and_calculate_stats([instance, file_dict[instance], model, opt.target_class_threshold, i, total_instances]) for i, instance in enumerate(file_dict.keys())]
+        stats_list = [load_instance_and_calculate_stats([instance, file_dict[instance], model, opt.target_class_threshold, i, total_instances]) for i, instance in enumerate(sorted_keys)]
 
     print()  # Move to the next line after the loop completes
 
-    df_stats = produce_df_from_test_stats(stats_list)
+    label_list = []
+    pred_list = []
+    for i in stats_list:
+        label_list.append(i[0])
+        pred_list.append(i[1])
+    all_labels = np.concatenate(label_list)
+    all_preds = np.concatenate(pred_list)
+
+    df_stats = produce_df_from_test_stats(all_labels,all_preds)
     # Save the DataFrame to CSV
     df_stats = df_stats.round(4)
     df_stats.to_csv(opt.output_file, index=False)
     print("CSV file has been saved with model performance metrics.")
+    if opt.save_predictions_to_file:
+        np.save(opt.output_file.split('.')[0]+'_preds.npy',all_preds)
+        np.save(opt.output_file.split('.')[0] + '_labels.npy', all_labels)
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Model testing configuration")
@@ -256,6 +284,7 @@ if __name__ == '__main__':
     parser.add_argument('--trained_model_path', type=str, help='Path to the trained model file')
     parser.add_argument('--target_class_threshold', type=float, default=0.5, help='Threshold value to classify target classes. When set to 0, the program will run multiple threshold (for evaluating optimal threshold)')
     parser.add_argument('--cores', type=int, default=1, help='Number of computing cores you want to use for parallelizing the test set predictions.')
+    parser.add_argument('--save_predictions_to_file', action="store_true", default=False)
     opt = parser.parse_args()
     main(opt)
 
@@ -267,8 +296,9 @@ if __name__ == '__main__':
 # opt = SimpleNamespace(
 #     input_folder='data/processed_geodata/boreal_south/boreal_south_geodata/testset',
 #     output_file='results/test_stats/boreal_south_testset.csv',
-#     trained_model_path='train/boreal_south/100,50,100/best_model.pth',
+#     trained_model_path='train/first_round/boreal_south/100,50,100/best_model.pth',
 #     target_class_threshold=0,
-#     cores = 1
+#     cores = 1,
+#     save_predictions_to_file=True
 # )
 
