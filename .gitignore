@@ -172,3 +172,5 @@ mlruns/
 train/
 predictions/
 prediction_geodata/
+/personal_code.py
+/api_download_geodata.py
