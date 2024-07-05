@@ -2,10 +2,13 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc, precision_recall_curve
+from run_testset_prediction import produce_df_from_test_stats
 import numpy as np
+import matplotlib
+# Set the global font to Arial
+matplotlib.rcParams['font.family'] = 'Arial'
 
-
-def read_test_stats_from_csv_files(directory,threshold,extract_best_threshold):
+def read_test_stats_from_csv_files(directory,threshold,extract_best_threshold, plot_p_r_curve=False):
     # List to store results
     results = []
     # Loop through files in the directory
@@ -33,19 +36,19 @@ def read_test_stats_from_csv_files(directory,threshold,extract_best_threshold):
                     'Precision': precision,
                     'Recall': recall,
                     'F1 Score': f1_score,
-                    'AUC': pr_auc
+                    'AUC': pr_auc,
+                    'Best threshold': data.values[0,0]
                 })
-            plt.figure(figsize=(8, 5))
-            plt.plot(data['Recall'].values[1:], data['Precision'].replace(0.0, 1.0).values[1:], marker='o')
-            plt.xlabel('Recall')
-            plt.ylabel('Precision')
-            plt.title('Precision-Recall Curve')
-            plt.grid(True)
-            plt.xlim([0, 1])
-            plt.ylim([0, 1])
-
-            plt.savefig('results/modeltesting/plots/precision_recall_curve_%s.pdf' % base_name, bbox_inches='tight')
-
+            if plot_p_r_curve:
+                plt.figure(figsize=(8, 5))
+                plt.plot(data['Recall'].values[1:], data['Precision'].replace(0.0, 1.0).values[1:], marker='o')
+                plt.xlabel('Recall')
+                plt.ylabel('Precision')
+                plt.title('Precision-Recall Curve')
+                plt.grid(True)
+                plt.xlim([0, 1])
+                plt.ylim([0, 1])
+                plt.savefig('results/modeltesting/plots/precision_recall_curve_%s.pdf' % base_name, bbox_inches='tight')
     # Convert results to a DataFrame for better visualization
     output_df = pd.DataFrame(results)
     return output_df
@@ -56,19 +59,21 @@ def read_test_stats_from_csv_files(directory,threshold,extract_best_threshold):
 
 # Directory containing the CSV files
 directory = 'results/modeltesting/testset_performance' # csv files produced with run_testset_prediction.py
+directory='/Users/toban562/Desktop/tmp'
 threshold = 0.5
 extract_best_threshold = False
-output_df = read_test_stats_from_csv_files(directory,threshold,extract_best_threshold)
+output_df = read_test_stats_from_csv_files(directory,threshold,extract_best_threshold,plot_p_r_curve=False)
 
 # Identify float columns in the DataFrame
 float_cols = output_df.select_dtypes(include=['float64']).columns
 # Round only the float columns to 3 decimal places
 output_df[float_cols] = output_df[float_cols].round(4)
 if extract_best_threshold:
-    txtfile_name = 'results/modeltesting/modeltestscores_test_set_threshold_best.txt'
+    txtfile_name = 'results/modeltesting/testset_performance/modeltestscores_test_set_threshold_best.txt'
 else:
-    txtfile_name = 'results/modeltesting/modeltestscores_test_set_threshold_%.4f.txt'%threshold
+    txtfile_name = 'results/modeltesting/testset_performance/modeltestscores_test_set_threshold_%.4f.txt'%threshold
 output_df.to_csv(txtfile_name, sep='\t', index=False)
+
 
 metrics = ['Accuracy','F1 Score','Precision','Recall','AUC']
 
@@ -144,6 +149,86 @@ for metric in metrics:
     plt.show()
 
 
+
+
+
+bins = 100
+threshold = 0.9
+
+npy_file = 'results/test_stats/boreal_south_batchsize_5_testset.npy'
+preds = np.load(npy_file)
+#plt.hist(preds,100,log=True)
+plt.figure(figsize=(5, 3))
+counts, bin_edges, patches = plt.hist(preds, bins=bins, log=True, color='#C0C0C0')  # Default grey color
+# Color the bars based on the threshold
+for patch, left_edge in zip(patches, bin_edges[:-1]):
+    if left_edge >= threshold:
+        patch.set_facecolor('#659C5D')  # Green color
+plt.ylim(bottom=10000, top=10000000)
+plt.title('%.4f'%(len(preds[preds>threshold])/len(preds)))
+plt.savefig( 'results/test_stats/%s_pred_hist_threshold_%.1f.png'%(os.path.basename(npy_file).replace('_testset.npy',''),threshold),bbox_inches='tight', dpi=900)
+
+npy_file = 'results/test_stats/boreal_south_regular_loss_batchsize_5_testset.npy'
+preds = np.load(npy_file)
+# plt.hist(preds,100,log=True)
+plt.figure(figsize=(5, 3))
+counts, bin_edges, patches = plt.hist(preds, bins=bins, log=True, color='#C0C0C0')  # Default grey color
+# Color the bars based on the threshold
+for patch, left_edge in zip(patches, bin_edges[:-1]):
+    if left_edge >= threshold:
+        patch.set_facecolor('#659C5D')  # Green color
+plt.ylim(bottom=10000, top=10000000)
+plt.title('%.4f'%(len(preds[preds>threshold])/len(preds)))
+plt.savefig( 'results/test_stats/%s_pred_hist_threshold_%.1f.png'%(os.path.basename(npy_file).replace('_testset.npy',''),threshold),bbox_inches='tight', dpi=900)
+
+
+threshold = 0.9
+base_dir = 'results/modeltesting/'
+region_list = ['alpine','boreal_east','boreal_northwest','boreal_south','continental']
+preds = []
+for region in region_list:
+    npy_file = os.path.join(base_dir,'bubnicki_preds_%s.npy'%region)
+    tmp_preds = np.load(npy_file)
+    preds.append(tmp_preds)
+preds = np.concatenate(preds)
+valid_preds = preds[~np.isnan(preds)]
+# plt.hist(preds,100,log=True)
+plt.figure(figsize=(5, 3))
+counts, bin_edges, patches = plt.hist(valid_preds, bins=bins, log=True, color='#C0C0C0')  # Default grey color
+# Color the bars based on the threshold
+for patch, left_edge in zip(patches, bin_edges[:-1]):
+    if left_edge >= threshold:
+        patch.set_facecolor('#659C5D')  # Green color
+plt.ylim(bottom=10000, top=40000000)
+plt.title('%.4f'%(len(valid_preds[valid_preds>threshold])/len(valid_preds)))
+plt.savefig( 'results/test_stats/bubnicki_pred_hist_threshold_%.1f.png'%threshold,bbox_inches='tight', dpi=900)
+
+
+threshold = 0.9
+base_dir = 'results/testset_predictions_final_model_with_saved_arrays'
+region_list = ['alpine','boreal_east','boreal_northwest','boreal_south','continental']
+preds = []
+labels = []
+for region in region_list:
+    preds_npy_file = os.path.join(base_dir,'sweden_all_batchsize_5_100,50,100_%s_testset_preds.npy'%region)
+    tmp_preds = np.load(preds_npy_file)
+    preds.append(tmp_preds)
+    labels_npy_file = os.path.join(base_dir,'sweden_all_batchsize_5_100,50,100_%s_testset_labels.npy'%region)
+    tmp_labels = np.load(labels_npy_file)
+    labels.append(tmp_labels)
+preds = np.concatenate(preds)
+labels = np.concatenate(labels)
+valid_preds = preds[~np.isnan(preds)]
+# plt.hist(preds,100,log=True)
+plt.figure(figsize=(5, 3))
+counts, bin_edges, patches = plt.hist(valid_preds, bins=bins, log=True, color='#C0C0C0')  # Default grey color
+# Color the bars based on the threshold
+for patch, left_edge in zip(patches, bin_edges[:-1]):
+    if left_edge >= threshold:
+        patch.set_facecolor('#659C5D')  # Green color
+plt.ylim(bottom=10000, top=40000000)
+plt.title('%.4f'%(len(valid_preds[valid_preds>threshold])/len(valid_preds)))
+plt.savefig( 'results/test_stats/sweden_all_pred_hist_threshold_%.1f.png'%threshold,bbox_inches='tight', dpi=900)
 
 
 
