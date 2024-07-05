@@ -43,7 +43,7 @@ def read_test_stats_from_csv_files(directory,threshold,extract_best_threshold):
     return output_df
 
 
-test_stat_file = 'results/test_stats/boreal_south_batchsize_5_testset.csv'
+test_stat_file = 'results/test_stats/boreal_east_batchsize_5_testset.csv'
 df = pd.read_csv(test_stat_file)
 
 # Plotting
@@ -87,8 +87,8 @@ plt.show()
 
 
 # Set the directory containing the CSV files
-directory = 'results/modeltesting'
-metric = 'Accuracy'
+directory = 'results/test_stats'
+metric = 'F1 Score'
 
 # Initialize a figure for plotting
 plt.figure(figsize=(10, 8))
@@ -127,7 +127,7 @@ plt.ylabel('%s'%metric)
 plt.legend()
 plt.grid(True)
 # Save the plot to a PDF file
-plt.savefig('results/%s_vs_threshold.pdf'%metric, bbox_inches='tight')
+plt.savefig('results/test_stats/%s_vs_threshold.pdf'%metric, bbox_inches='tight')
 
 # Show the plot
 plt.show()
@@ -138,7 +138,7 @@ print(f"The highest %s at threshold 0.05 is {max_precision}, found in file {max_
 
 
 # AUC
-directory = 'results/modeltesting'
+directory = 'results/test_stats'
 
 auc_values = []
 model_names = []
@@ -172,7 +172,7 @@ plt.xlabel('Groups')
 plt.ylabel('Values')
 
 # Save the plot to a PDF file
-plt.savefig('results/AUC_scores.pdf', bbox_inches='tight')
+plt.savefig('results/test_stats/AUC_scores.pdf', bbox_inches='tight')
 
 # Show the plot
 plt.show()
@@ -182,48 +182,53 @@ plt.show()
 
 # load the csv file data in the target_dir_________________________________
 # Directory containing the CSV files
-directory = 'results/modeltesting'
+directory = 'results/test_stats'
 threshold = 0.5
 extract_best_threshold = False
 
 output_df = read_test_stats_from_csv_files(directory,threshold,extract_best_threshold)
 
 if 'test_stats' in directory:
-    order_of_keys = ['boreal_south', 'boreal_east', 'boreal_northwest', 'alpine', 'continental']
+    order_of_keys = ['boreal_south_batchsize_5', 'boreal_east_batchsize_5', 'boreal_northwest_batchsize_5', 'alpine_batchsize_5', 'continental_batchsize_5', 'bubnicki.csv']
     # Create a categorical type based on the defined order of keys
+    output_df = output_df[output_df['experiment_name'].isin(order_of_keys)]
     output_df['experiment_name'] = pd.Categorical(output_df['experiment_name'], categories=order_of_keys, ordered=True)
     # Sort the DataFrame by 'Filename Base'
     output_df = output_df.sort_values('experiment_name')
     # Format 'experiment_name' for display
-    formatted_experiment_names = [name.replace('_', ' ').capitalize() for name in output_df['experiment_name']]
+    formatted_experiment_names = [name.replace('_batchsize_5','').replace('.csv','').replace('_', ' ').capitalize() for name in output_df['experiment_name']]
 else:
     formatted_experiment_names = [name for name in output_df['experiment_name']]
+metrics = ['Accuracy','F1 Score','Precision','Recall','AUC']
 
+# make the multibarplot plot
 # Set the position of the bars
-barWidth = 0.2
+barWidth = 0.15
 r1 = np.arange(len(output_df['experiment_name']))
 r2 = [x + barWidth for x in r1]
 r3 = [x + barWidth for x in r2]
 r4 = [x + barWidth for x in r3]
+r5 = [x + barWidth for x in r4]
 
 # Create the bar plot
 plt.figure(figsize=(10, 5))
-plt.bar(r1, output_df['Accuracy'], color='b', width=barWidth, edgecolor='grey', label='Accuracy', zorder=3)
-plt.bar(r2, output_df['F1 Score'], color='g', width=barWidth, edgecolor='grey', label='F1', zorder=3)
-plt.bar(r3, output_df['Precision'], color='r', width=barWidth, edgecolor='grey', label='Precision', zorder=3)
-plt.bar(r4, output_df['Recall'], color='c', width=barWidth, edgecolor='grey', label='Recall', zorder=3)
+plt.bar(r1, output_df[metrics[0]], color='b', width=barWidth, edgecolor='grey', label=metrics[0], zorder=3)
+plt.bar(r2, output_df[metrics[1]], color='g', width=barWidth, edgecolor='grey', label=metrics[1], zorder=3)
+plt.bar(r3, output_df[metrics[2]], color='r', width=barWidth, edgecolor='grey', label=metrics[2], zorder=3)
+plt.bar(r4, output_df[metrics[3]], color='c', width=barWidth, edgecolor='grey', label=metrics[3], zorder=3)
+plt.bar(r5, output_df[metrics[4]], color='y', width=barWidth, edgecolor='grey', label=metrics[4], zorder=3)
 
 # Add xticks on the middle of the group bars
-plt.xlabel('Experiment Name', fontweight='bold')
+plt.xlabel('Model', fontweight='bold')
 plt.ylabel('Metrics Value', fontweight='bold')
 plt.xticks([r + barWidth + barWidth / 2 for r in range(len(r1))], formatted_experiment_names)
+plt.xticks(rotation='vertical')
 
 # Create legend & Show graphic
 # plt.legend()
 plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
 plt.ylim(0, 1)  # Scale y-axis from 0 to 1
 
-plt.xticks(rotation='vertical')
 plt.yticks(np.arange(0, 1.1, 0.1))
 plt.grid(axis='y', linestyle='-', alpha=0.7, zorder=0)
 
