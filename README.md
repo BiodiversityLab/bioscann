@@ -33,8 +33,8 @@ In this step we create the cropping windows for the individual instances that we
 
 ```commandline
 python crop_windows_from_polygons.py \
-    --input_path data/polygons/boreal_south \
-    --output_path data/processed_geodata/boreal_south/cropped_windows \
+    --input_path tutorial/polygons/boreal_south \
+    --output_path tutorial/processed_geodata/boreal_south/cropped_windows \
     --extent_size 1280 \
     --no_overlap
 ```
@@ -45,12 +45,14 @@ To download the remote-sensing derived environmental features for each instance 
 - username: `skstemp_user`
 - password: `S7Qawt3v`
 
-For this script to run, it requires the input folder `data/processed_geodata/boreal_south/cropped_windows` resulting from the previous command. You can either wait for the previous command to finish or download the compiled output of the previous script from the supplementary data uploaded with the `bioscann` manuscript. In the latter case, make sure it is placed in the right location in your working directory for the script to find it.
+For this script to run, it requires the input folder `tutorial/processed_geodata/boreal_south/cropped_windows` resulting from the previous command. You can either wait for the previous command to finish or download the compiled output of the previous script from the supplementary data uploaded with the `bioscann` manuscript. In the latter case, make sure it is placed in the right location in your working directory for the script to find it.
+
+**! Note !:** The set of environmental features in this tutorial differs slightly from the set used in the original implementation presented in the manuscript, due to updates on the data server. Instead of 11 channels in the original implementation, the data used in this tutorial consist of only 9 channels.
 
 ```commandline
 python extract_geo_data.py \
-    --output_path data/processed_geodata/boreal_south/boreal_south_geodata  \
-    --window_coordinates data/processed_geodata/boreal_south/cropped_windows \
+    --output_path tutorial/processed_geodata/boreal_south/boreal_south_geodata  \
+    --window_coordinates tutorial/processed_geodata/boreal_south/cropped_windows \
     --configuration version_public_sat_2024 \
     --test_config version_1 \
     --testset_size 0.2 \
@@ -66,14 +68,11 @@ The next step is training the deep-learning model, which can be time-intensive d
 
 ```commandline
 python train_model.py \
-    --batch 5 \
-    --input 11 \
-    --output 1 \
-    --algorithm AttentionPixelClassifierFlex \
+    --batch_size 5 \
     --device cpu \
-    --dataset data/processed_geodata/boreal_south/boreal_south_geodata \
-    --validation data/processed_geodata/boreal_south/boreal_south_geodata/validation \
-    --test_dataset data/processed_geodata/boreal_south/boreal_south_geodata/testset/ \
+    --dataset tutorial/processed_geodata/boreal_south/boreal_south_geodata \
+    --validation tutorial/processed_geodata/boreal_south/boreal_south_geodata/validation \
+    --test_dataset tutorial/processed_geodata/boreal_south/boreal_south_geodata/testset/ \
     --plot \
     --experiment_name trained_model_tutorial \
     --epochs 300 \
@@ -83,6 +82,8 @@ python train_model.py \
     --pfi \
     --patience 20
 ```
+
+The model will be stored in the `train/` directory in the main folder under the name provided as `--experiment_name`.
 
 ## Extract environmental features for predictions
 Now that we have a trained model, let us make predictions for an area of interest. The first step is to define the area and extract all needed environmental predictors for this area. You can define the area by providing the coordinates of the bottom left and the top right corner (using the [SWEREF 99](https://www.lantmateriet.se/en/geodata/gps-geodesi-och-swepos/reference-systems/three-dimensional-systems/SWEREF-99/) coordinate reference system). The script will draw a rectangle between the provided points, break up the area into 1.28 x 1.28 km tiles, and extract all environmental features for each tile.
@@ -96,7 +97,7 @@ python download_prediction_geodata.py \
   --coordinates 522375,6416051,532938,6425134 \
   --offset 1280 \
   --image_size 128 \
-  --download_folder data/prediction_geodata/download_folder \
+  --download_folder tutorial/prediction_geodata/download_folder \
   --configuration version_public_sat_2024 \
   --meters_per_pixel 10 \
   --image_scale 1 \
@@ -105,29 +106,33 @@ python download_prediction_geodata.py \
   --username skstemp_user \
   --password S7Qawt3v \
   --threads 10 \
-  --sweden_map data/sweden_polygon/Sweref_99_TM/shape/swemap_gpkg/swemap.gpkg \
-  --auto_adjust_prediction_range
+  --sweden_map data/sweden_polygon/Sweref_99_TM/shape/swemap_gpkg/swemap.gpkg
 ```
 
 ## Make predictions with trained model
 Now we use the trained model to make predictions for all tiles for which we downloaded the environmental features in the previous step. Since we applied a 200 m buffer to each tile, we need to remove this buffer from the predictions to convert each tile back to the target-tile-size. Therefore we apply the flag `--crop_corners 20`, which removes 20 pixels (at 10 m per pixel = 200 m) around each prediction image.
 
+**! Note !:** If you trained your own model based on the environmental features you downloaded during this tutorial, your model will be trained on 9 environmental data channels (see explanation above). If you download our pre-trained model presented in the manuscript, you will be working with a model that is trained on 11 environmental data channels, instead. In the latter case you won't be able to use the pre-trained model to make predictions for the data you downloaded in the previous step, because the number of channels does not match what the model has been trained on. In that case you can use the `prediction_geodata/download_folder` provided in our supplementary data package.
+
 ```commandline
 python make_predictions.py \
---geodata_folder data/prediction_geodata/download_folder \
---output_path predictions/model_predictions_tutorial \
+--geodata_folder tutorial/prediction_geodata/download_folder \
+--output_path tutorial/model_predictions_tutorial \
 --trained_model train/trained_model_tutorial/100,50,100/best_model.pth \
 --crop_corners 20 \
 --apply_mask \
---configuration version_public_sat_2024 \
 --threads 10
 ```
 
 
-
-
 ## Merge predictions into one spatial raster
+Now we have produced predictions for each individual tile with our trained model. The final step is to merge these predictions into one geo-referenced raster, using the command below.
+
 ```commandline
-gdal_merge.py -o merged_predictions.tiff -ot Float32 -v -a_nodata 0 -init 0 output/*.tiff
+python merge_tiff_files.py \
+    --input tutorial/model_predictions_tutorial/predictions \
+    --outfile tutorial/model_predictions_tutorial/merged_predictions.tiff
 ```
+
+
 

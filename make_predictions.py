@@ -274,6 +274,12 @@ def main(opt):
     start_time = time.time()
     print("main")
     ensure_dir(opt.output_path)
+    # load configuration info
+    conf_info_file = os.path.join(opt.geodata_folder, 'configuration_info.txt')
+    with open(conf_info_file, 'r') as file:
+        configuration = file.read()  # Read all the contents of the file into a variable
+    print(configuration)
+    opt.configuration = configuration
 
     # get list of required data channels
     selected_apis = []
@@ -337,7 +343,6 @@ if __name__=='__main__':
     parser.add_argument('--output_path', type=str, default='output')
     parser.add_argument('--outfile_stem', type=str, default='prediction', help='Name_stem of output tiff-files containing predictions.')
     parser.add_argument('--trained_model', type=str, default='model.pth', help='model.pth path')
-    parser.add_argument('--configuration', action='store', default='version_public_sat')
     parser.add_argument('--device', action='store', type=str, default='0')
     parser.add_argument('--threads', type=int, action='store', default=1)
     parser.add_argument('--region_file', action='store', default='')
@@ -358,7 +363,6 @@ if __name__=='__main__':
 #     output_path='predictions/test_area_batchsize_5',
 #     outfile_stem='prediction',
 #     trained_model='train/modeltesting_models/100,50,100_5_weighted_loss.pth',
-#     configuration='version_public_sat',
 #     device='0',
 #     threads=10,
 #     region_file='',

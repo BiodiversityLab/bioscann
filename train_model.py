@@ -5,6 +5,7 @@ import os
 import copy
 import pdb
 from locale import normalize
+import json
 
 import cv2
 import matplotlib
@@ -288,6 +289,14 @@ def weighted_bce_loss(outputs, targets,weight_for_1,weight_for_0):
 
 def main(opt):
     experiment_path = os.path.join(opt.workdir, "train", opt.experiment_name,opt.n_channels_per_layer)
+
+    # Path to the JSON file
+    json_file_path = os.path.join(opt.dataset, "channel_info.json")
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
+    # Count the number of keys in the dictionary
+    opt.input_channels = [len(data)]
+
     print('Training results will be stored at', experiment_path)
     if not os.path.exists(experiment_path):
         os.makedirs(experiment_path)
@@ -672,7 +681,6 @@ if __name__ == "__main__":
     parser.add_argument("--img_size", type=int, nargs="+", default=[256])
     parser.add_argument("--dataset", action="store", default="training_dataset")
     parser.add_argument("--validation", action="store", default="")
-    parser.add_argument("--input_channels", type=int, nargs="+", action="store", default=[3, 3])
     parser.add_argument("--output_channels", type=int, action="store", default=1)
     parser.add_argument("--experiment_name", action="store", default="default")
     parser.add_argument("--weights", action="store", default="")
@@ -680,7 +688,7 @@ if __name__ == "__main__":
     parser.add_argument("--mlflow", action="store_true")
     parser.add_argument("--learning_rate", type=float, default=0.0008)
     parser.add_argument("--device", action="store", type=str, default="0")
-    parser.add_argument("--algorithm", action="store", type=str, default="multidimPixelClassifier")  # AttentionPixelclassifier
+    parser.add_argument("--algorithm", action="store", type=str, default="AttentionPixelClassifierFlex")  # AttentionPixelclassifier
     parser.add_argument("--no_loss_mask", action="store_true", default=False)
     parser.add_argument("--test_dataset", action="store", default="")
     parser.add_argument('--pfi', action='store_true', help='permutation feature importance flag for test method')
@@ -732,7 +740,6 @@ if __name__ == "__main__":
 #     img_size=[128],
 #     dataset=f"data/processed_geodata/{region}/{region}_geodata",
 #     validation=f"data/processed_geodata/{region}/{region}_geodata/validation",
-#     input_channels=[11],  # Assuming '11' is the correct value
 #     output_channels=1,
 #     experiment_name=f"{region}_flex_{configuration}",
 #     weights="",

@@ -144,6 +144,10 @@ def main(opt):
         swe_poly_geometry = None
 
     print("using config {}".format(opt.configuration))
+    output_file = os.path.join(opt.download_folder, 'configuration_info.txt')
+    # Store configuration in info txt file with data
+    with open(output_file, 'w') as file:
+        file.write(str(opt.configuration))  # Convert the value to a string and write it to the file
     with open('utils/configurations.json',encoding='utf-8') as f:
         json_data = json.load(f)
 
