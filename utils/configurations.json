@@ -555,6 +555,49 @@
         ],
         "polygon_filtering_method": "version_2"
     },
+    "version_public_sat_2024": {
+        "apis": [
+            "treeheight_2024",
+            "soil_moisture",
+            "elevation_gradient_2024",
+            "ditches",
+            "peat_depth",
+            "soil_type",
+            "biomass_2024",
+            "leaves_present_2024",
+            "satellite"
+        ],
+        "prediction_masks": [
+            {
+                "api": "land_cover_types",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        115,
+                        116,
+                        117,
+                        118,
+                        121,
+                        122,
+                        123,
+                        124,
+                        125,
+                        126,
+                        127,
+                        128
+                    ]
+                ],
+                "mask_values_exclude": []
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
     "version_public_sks_gee": {
         "apis": [
             "treeheight",
