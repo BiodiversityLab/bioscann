@@ -135,4 +135,23 @@ python merge_tiff_files.py \
 ```
 
 
+## Plot the predictions
+You can either load the resulting tiff file into QGIS for an interactive view, or plot it with python using the following code:
+```python
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+# Path to the TIFF file
+tiff_file = 'tutorial/model_predictions_tutorial/merged_predictions.tiff'
+# Read the TIFF file using Pillow
+with Image.open(tiff_file) as img:
+    tiff_data = np.array(img)
+# Plot the TIFF data using the Turbo colormap
+plt.imshow(tiff_data, cmap='turbo')
+plt.colorbar()
+plt.title('Predictions of conservation value')
+plt.show()
+```
+The values on the x-axis and y-axis are scaled the number of 10m pixels, i.e. 500 units along one of the axes corresponds to a distance of 5 km.
 
+![Predictions of conservation value](img/conservation_value_predictions.png)
