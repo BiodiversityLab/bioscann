@@ -73,7 +73,7 @@ def point_clustering_to_boxes(searchstring, output_path, im_size=1280, no_overla
                 print('Försökte skapa extents för cluster:', name)
                 print(group_df.shape)
                 for i in range(group_df.shape[0]):
-                    # TODO: Kanske kan det i vissa fall vara bra att sprida punkter över ett polygon istället för att ta längs kanten.
+                    # Kanske kan det i vissa fall vara bra att sprida punkter över ett polygon istället för att ta längs kanten.
                     # I så fall lägg till följande så att man kan välja i anrop
                     # Within polygon
                     # random_points = generate_random_points_within_polygon(10, group_df.iloc[i]['geometry'] )
