@@ -12,21 +12,13 @@ This includes the following main steps:
 Download the `bioscann` GitHub repo and navigate into the project folder using your command line. For the installation in the next step you need to have the installation manager `conda` installed (download [here](https://docs.anaconda.com/miniconda/)).
 
 ## Installation
-You install the software as a conda package by executing the commands below in your command line. Before running the following installation commands, make sure you are located in the downloaded `bioscann` directory. For this to work the sub-directory `bin/AIRaster-dataprocessing` and the installation file `requirements.txt` need to be present in your directory. It is recommended to paste the commands below one by one to make sure the installation completes as expected.
+You install the software as a conda package by executing the command below in your command line. Before running the command, make sure you are located in the downloaded `bioscann` GitHub directory. For this to work the installation file `environment.yml` needs to be present in your directory.
+
 ```commandline
-conda create -y -n bioscann
-conda activate bioscann
-conda install -c conda-forge -y python=3.8
-conda install -c conda-forge -y fiona=1.9.3
-conda install -c conda-forge -y gdal=3.7.1
-conda install -c conda-forge -y imagecodecs=2023.1.23
-conda install -c conda-forge -y pytorch
-conda install -c conda-forge -y torchvision
-conda install -c conda-forge -y mlflow
-pip install -r requirements.txt
+conda env create -f environment.yml
 ```
 
-When running this tutorial, make sure you are connected to your bioscann conda environment, by running `conda activate bioscann` in your command line.
+From here on out, for any bioscann command you run, make sure you are connected to your bioscann conda environment, by running `conda activate bioscann` in your command line.
 
 
 ## Convert polygon data into individual instances
