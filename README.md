@@ -18,15 +18,16 @@ conda create -y -n bioscann
 conda activate bioscann
 conda install -c conda-forge -y python=3.8
 conda install -c conda-forge -y fiona=1.9.3
-conda install -c conda-forge -y imagecodecs
+conda install -c conda-forge -y gdal=3.7.1
+conda install -c conda-forge -y imagecodecs=2023.1.23
 conda install -c conda-forge -y pytorch
 conda install -c conda-forge -y torchvision
 conda install -c conda-forge -y mlflow
-cd bin/AIRaster-dataprocessing
-python -m pip install .
-cd ../..
 pip install -r requirements.txt
 ```
+
+When running this tutorial, make sure you are connected to your bioscann conda environment, by running `conda activate bioscann` in your command line.
+
 
 ## Convert polygon data into individual instances
 In this step we create the cropping windows for the individual instances that we use for model training and evaluation. For simplicity we show the `bioscann` wokflow for only one of the five separate bioregional subsets of the data, namely the southern boreal region.

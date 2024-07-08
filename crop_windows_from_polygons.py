@@ -1,7 +1,6 @@
 import os
 import argparse
-from AIRasterDataprocessing.createcontainingextents.coarse_clustring import coarse_clustering_of_points
-from AIRasterDataprocessing.createcontainingextents.point_clustring import point_clustering_to_boxes
+from utils.polygon_processing import coarse_clustering_of_points, point_clustering_to_boxes
 import glob
 import geopandas as geopd
 import pandas as pd
@@ -75,7 +74,7 @@ if __name__=='__main__':
 
     main(opt)
 
-# below code is for trouble-shooting purposes only:
+# # below code is for trouble-shooting purposes only:
 # from types import SimpleNamespace
 # # Create an opt object with the desired attributes
 # opt = SimpleNamespace(input_path='data/polygons/boreal_east', output_path='geopackage', extent_size='1280', no_overlap=True)
