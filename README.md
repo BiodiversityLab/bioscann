@@ -62,23 +62,25 @@ python extract_geo_data.py \
     --threads 10
 ```
 
+If you don't want to wait for this download to finish (several hours), you can instead download the precompiled data for this tutorial from the [figshare-link](https://figshare.com/s/637de046184aaee0b599) accompanying the `bioscann` manuscript.
+
 ## Train model
 The next step is training the deep-learning model, which can be time-intensive depending on the size of the input data. For our southern boreal dataset this will likely take more than 1 day, but it can be spead up considerably when running on a machine that can utilize GPU resources (requires manual installation and GPU-mounting of the pytorch machine learning library, not covered in this tutorial). You can start training your model by running the command below, but we recommend to use one of our provided trained models (see supplementary data) for the following steps.
+
+**! Note !:** We are using the precompiled data ([figshare-link](https://figshare.com/s/637de046184aaee0b599)) as input here to make sure we have a sufficiently large training dataset. In case you want to use the data you generated in the previous step, change the input paths for `--dataset`, `--validation`, and `--test_dataset` accordingly.
 
 ```commandline
 python train_model.py \
     --batch_size 5 \
     --device cpu \
-    --dataset tutorial/processed_geodata/boreal_south/boreal_south_geodata \
-    --validation tutorial/processed_geodata/boreal_south/boreal_south_geodata/validation \
-    --test_dataset tutorial/processed_geodata/boreal_south/boreal_south_geodata/testset/ \
+    --dataset tutorial/precompiled/processed_geodata/boreal_south/boreal_south_geodata \
+    --validation tutorial/precompiled/processed_geodata/boreal_south/boreal_south_geodata/validation \
+    --test_dataset tutorial/precompiled/processed_geodata/boreal_south/boreal_south_geodata/testset/ \
     --plot \
     --experiment_name trained_model_tutorial \
     --epochs 300 \
     --img_size 128 \
-    --mlflow \
     --n_channels_per_layer 100,50,100 \
-    --pfi \
     --patience 20
 ```
 
@@ -111,13 +113,13 @@ python download_prediction_geodata.py \
 ## Make predictions with trained model
 Now we use the trained model to make predictions for all tiles for which we downloaded the environmental features in the previous step. Since we applied a 200 m buffer to each tile, we need to remove this buffer from the predictions to convert each tile back to the target-tile-size. Therefore we apply the flag `--crop_corners 20`, which removes 20 pixels (at 10 m per pixel = 200 m) around each prediction image.
 
-**! Note !:** If you trained your own model based on the environmental features you downloaded during this tutorial, your model will be trained on 9 environmental data channels (see explanation above). If you download our pre-trained model presented in the manuscript, you will be working with a model that is trained on 11 environmental data channels, instead. In the latter case you won't be able to use the pre-trained model to make predictions for the data you downloaded in the previous step, because the number of channels does not match what the model has been trained on. In that case you can use the `prediction_geodata/download_folder` provided in our supplementary data package.
+**! Note !:** If you trained your own model based on the environmental features you compiled during this tutorial, your model will be trained on 9 environmental data channels (see explanation above). If you download our pre-trained model presented in the manuscript, you will be working with a model that is trained on 11 environmental data channels, instead. In the latter case you won't be able to use the pre-trained model to make predictions for the data you downloaded in the previous step, because the number of channels does not match what the model has been trained on. In the command below we use the precompiled data and pre-trained model ([figshare-link](https://figshare.com/s/637de046184aaee0b599)).
 
 ```commandline
 python make_predictions.py \
---geodata_folder tutorial/prediction_geodata/download_folder \
+--geodata_folder tutorial/precompiled/prediction_geodata/download_folder \
 --output_path tutorial/model_predictions_tutorial \
---trained_model train/trained_model_tutorial/100,50,100/best_model.pth \
+--trained_model tutorial/precompiled/best_model/100,50,100/best_model.pth \
 --crop_corners 20 \
 --apply_mask \
 --threads 10

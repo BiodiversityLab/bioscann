@@ -3,4 +3,3 @@ gdal=3.7
 fiona=1.9.3
 pytorch=2
 torchvision
-mlflow
