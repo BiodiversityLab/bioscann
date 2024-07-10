@@ -14,16 +14,11 @@ Download the `bioscann` GitHub repo and navigate into the project folder using y
 ## Installation
 You install the software as a conda package by executing the command below in your command line. Before running the command, make sure you are located in the downloaded `bioscann` GitHub directory. For this to work the installation file `environment.yml` needs to be present in your directory.
 
-**Install bioscann - the easy way (only MacOS):**
-```commandline
-conda env create -f environment.yml
-```
-
-**Install bioscann, the slightly more complicated way:**
+**Install bioscann (successfully tested on MacOS):**
 ```commandline
 conda create -y -n bioscann
 conda activate bioscann
-conda install -c conda-forge -y --file  requirements_conda.txt
+conda install -c conda-forge -y --file requirements_conda.txt
 pip install -r requirements_pip.txt
 ```
 
