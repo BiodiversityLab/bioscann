@@ -1,7 +1,6 @@
-python=3.8
-gdal=3.7.1
+imagecodecs
+gdal=3.7
 fiona=1.9.3
-imagecodecs=2023.1.23
 pytorch=2
 torchvision
 mlflow
