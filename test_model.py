@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 # from tifffile import imread
 from pathlib import Path
-import mlflow
+
 
 #os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 import pdb
@@ -146,7 +146,7 @@ def main(opt: dict, init=True, model=''):
     ) = evaluate_model(model, mDataloader, lossFn, device)
 
     if opt.mlflow:
-
+        import mlflow
         # Compose log dict
         log_dict = {
             'loss': loss,
@@ -376,6 +376,7 @@ if __name__ == "__main__":
     opt = parser.parse_args()
 
     if opt.mlflow:
+        import mlflow
         # mlflow.set_tracking_uri("file:/mnt/mlflow_tracking/mlruns")
         mlflow.set_tracking_uri('mlruns')
         mlflow.set_experiment(opt.experiment_name)

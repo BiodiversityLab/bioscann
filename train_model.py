@@ -10,8 +10,6 @@ import json
 import cv2
 import matplotlib
 import matplotlib.pyplot as plt
-import mlflow
-from mlflow.tracking import MlflowClient
 import numpy as np
 import torch
 import torch.optim as optim
@@ -701,6 +699,8 @@ if __name__ == "__main__":
     opt = parser.parse_args()
 
     if opt.mlflow:
+        import mlflow
+        from mlflow.tracking import MlflowClient
         # close any existing runs
         mlflow.end_run()
         #mlflow.set_tracking_uri("file:/mnt/mlflow_tracking/mlruns")
