@@ -14,8 +14,17 @@ Download the `bioscann` GitHub repo and navigate into the project folder using y
 ## Installation
 You install the software as a conda package by executing the command below in your command line. Before running the command, make sure you are located in the downloaded `bioscann` GitHub directory. For this to work the installation file `environment.yml` needs to be present in your directory.
 
+**Install bioscann - the easy way (only MacOS):**
 ```commandline
 conda env create -f environment.yml
+```
+
+**Install bioscann, the slightly more complicated way:**
+```commandline
+conda create -y -n bioscann
+conda activate bioscann
+conda install -c conda-forge -y --file  requirements_conda.txt
+pip install -r requirements_pip.txt
 ```
 
 From here on out, for any bioscann command you run, make sure you are connected to your bioscann conda environment, by running `conda activate bioscann` in your command line.
@@ -26,7 +35,7 @@ In this step we create the cropping windows for the individual instances that we
 
 ```commandline
 python crop_windows_from_polygons.py \
-    --input_path tutorial/polygons/boreal_south \
+    --input_path data/polygons/boreal_south \
     --output_path tutorial/processed_geodata/boreal_south/cropped_windows \
     --extent_size 1280 \
     --no_overlap

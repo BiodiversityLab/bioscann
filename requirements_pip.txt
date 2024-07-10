@@ -1,0 +1,14 @@
+geopandas>=0.9.0
+numpy>=1.21.6
+shapely==1.8.4
+scikit-learn>=1.1.2
+scipy>=1.5.2
+scikit-image>=0.19.3
+opencv-python==4.5.5.64
+matplotlib==3.5.1
+exifread==2.3.2
+requests
+rtree==1.0.0
+sweref99==0.2
+tensorboard>=2.8.0
+tqdm==4.64.1
