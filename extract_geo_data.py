@@ -157,7 +157,6 @@ def do_work(extent_name,json_data,opt,train_annotation_path,testset_instances_di
         if index in selected_test_ids:
             target_folder_features = test_features_path
             target_folder_annotations = test_annotation_path
-
         elif index in selected_validation_ids:
             target_folder_features = validation_features_path
             target_folder_annotations = validation_annotation_path
@@ -305,7 +304,7 @@ def main(opt):
 def save_apis_channel_data(extent_name, selected_apis, meters_per_pixel, output_path):
     '''Save the channel information for an extent'''
     output_file = os.path.join(output_path, 'channel_info.json')
-    
+
     # Get channel info
     index = 0
     polygon_ids = cp.read_gpkg(extent_name)
@@ -359,7 +358,7 @@ if __name__=='__main__':
 
     main(opt)
 
-
+#
 # # below code is for trouble-shooting purposes only:
 # from types import SimpleNamespace
 #
@@ -372,8 +371,8 @@ if __name__=='__main__':
 #     testset_size=0.2,
 #     validation_size=0.2,
 #     test_area=[389000, 6752000, 389000, 6757000],
-#     configuration="version_public_sat",
-#     window_coordinates="data/processed_geodata/test/cropped_windows",
+#     configuration="version_public_sat_2024",
+#     window_coordinates="tutorial/precompiled/processed_geodata/boreal_south/cropped_windows",
 #     polygons_path='geopackage',
 #     lonlat_features=False,
 #     meters_per_pixel=10,

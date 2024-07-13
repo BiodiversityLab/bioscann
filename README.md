@@ -44,16 +44,19 @@ To download the remote-sensing derived environmental features for each instance 
 - username: `skstemp_user`
 - password: `S7Qawt3v`
 
-For this script to run, it requires the input folder `tutorial/processed_geodata/boreal_south/cropped_windows` resulting from the previous command. You can either wait for the previous command to finish or download the compiled output of the previous script from the supplementary data uploaded with the `bioscann` manuscript. In the latter case, make sure it is placed in the right location in your working directory for the script to find it.
+For this script to run, it requires as input the folder with the cropped instances resulting from the previous command.
+However, the upcoming data download step will take a long time to finish for all instances compiled in the previous step.
+We therefore recommend to instead download the `precompiled.zip` folder from the supplementary data accompanying the manuscript ([figshare-link](https://figshare.com/s/637de046184aaee0b599)), which contains a reduced selection of instances of our selected bioregion. We recommend to place and unzip the downloaded `precompiled.zip` folder in your `./tutorial` working folder.
+The file paths provided in this tutorial assume this file-structure, you will have to adjust them accordingly in case you want to use your own files.
 
-**! Note !:** The set of environmental features in this tutorial differs slightly from the set used in the original implementation presented in the manuscript, due to updates on the data server. Instead of 11 channels in the original implementation, the data used in this tutorial consist of only 9 channels.
+**!Note!:** The set of environmental features in this tutorial differs slightly from the set used in the original implementation presented in the manuscript, due to updates on the data server. Instead of 11 channels in the original implementation, the data used in this tutorial consist of only 9 channels.
 
 ```commandline
 python extract_geo_data.py \
     --output_path tutorial/processed_geodata/boreal_south/boreal_south_geodata  \
-    --window_coordinates tutorial/processed_geodata/boreal_south/cropped_windows \
+    --window_coordinates tutorial/precompiled/processed_geodata/boreal_south/cropped_windows \
     --configuration version_public_sat_2024 \
-    --test_config version_1 \
+    --test_config version_2 \
     --testset_size 0.2 \
     --img-size 128 \
     --username skstemp_user \
@@ -62,12 +65,17 @@ python extract_geo_data.py \
     --threads 10
 ```
 
-If you don't want to wait for this download to finish (several hours), you can instead download the precompiled data for this tutorial from the [figshare-link](https://figshare.com/s/637de046184aaee0b599) accompanying the `bioscann` manuscript.
+To learn more about the api download of environmental features, check out the jupyter notebook in this repository [./download_geodata_api.ipynb](./download_geodata_api.ipynb).
+
+To explore the downloaded tiff files resulting from the command above, check out the notebook [./display_downloaded_tiff.ipynb](./display_downloaded_tiff.ipynb).
 
 ## Train model
-The next step is training the deep-learning model, which can be time-intensive depending on the size of the input data. For our southern boreal dataset this will likely take more than 1 day, but it can be spead up considerably when running on a machine that can utilize GPU resources (requires manual installation and GPU-mounting of the pytorch machine learning library, not covered in this tutorial). You can start training your model by running the command below, but we recommend to use one of our provided trained models (see supplementary data) for the following steps.
+The next step is training the deep-learning model, which can be time-intensive depending on the size of the input data.
+For the entire southern boreal dataset this will likely take more than 1 day, but it can be spead up considerably when running on a machine that can utilize GPU resources (requires manual installation and GPU-mounting of the pytorch machine learning library, not covered in this tutorial).
+You can start training your model using the reduced input data provided in the `precompiled.zip` folder.
+However, since this model won't train very well on such little input data, we recommend to use one of our provided trained models (also found in `precompiled.zip`) for the following steps.
 
-**! Note !:** We are using the precompiled data ([figshare-link](https://figshare.com/s/637de046184aaee0b599)) as input here to make sure we have a sufficiently large training dataset. In case you want to use the data you generated in the previous step, change the input paths for `--dataset`, `--validation`, and `--test_dataset` accordingly.
+**! Note !:** We are using the reduced precompiled data ([figshare-link](https://figshare.com/s/637de046184aaee0b599)) as input here to speed up model training. In case you want to use your own compiled large dataset, change the input paths for `--dataset`, `--validation`, and `--test_dataset` accordingly.
 
 ```commandline
 python train_model.py \
@@ -86,7 +94,7 @@ python train_model.py \
 
 The model will be stored in the `train/` directory in the main folder under the name provided as `--experiment_name`.
 
-## Extract environmental features for predictions
+## Extract environmental features for target area for predictions
 Now that we have a trained model, let us make predictions for an area of interest. The first step is to define the area and extract all needed environmental predictors for this area. You can define the area by providing the coordinates of the bottom left and the top right corner (using the [SWEREF 99](https://www.lantmateriet.se/en/geodata/gps-geodesi-och-swepos/reference-systems/three-dimensional-systems/SWEREF-99/) coordinate reference system). The script will draw a rectangle between the provided points, break up the area into 1.28 x 1.28 km tiles, and extract all environmental features for each tile.
 
 The trained model can only be applied to sites in Sweden, as several of the environmental features are only available within the country boundaries. To make sure all your tiles are within Sweden you can provide a cropping polygon of Sweden that will be used to filter your tiles. For this, use the `--sweden_map` flag and point to the provided shape-file: `'data/sweden_polygon/Sweref_99_TM/shape/swemap_gpkg/swemap.gpkg'`. (Note: To make predictions for all of Sweden, you can add the `--auto_adjust_prediction_range` flag, which will identify all tiles within the bounds of the Sweden polygon, independent of the provided input coordinates).

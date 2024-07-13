@@ -33,5 +33,40 @@
                 "compose": "latitude_south_of_6590000"
             }
         ]
+    },
+    "version_2": {
+        "apis": [
+            "land_cover_types",
+            "treeheight_2024"
+        ],
+        "feature_preprocess_compositions": [
+            {
+                "compose": "marktacke_2_0_moist"
+            },
+            {
+                "compose": "marktacke_2_0_dry"
+            },
+            {
+                "compose": "marktacke_2_0_coniferous"
+            },
+            {
+                "compose": "marktacke_2_0_deciduous"
+            },
+            {
+                "compose": "marktacke_2_0_coniferous_deciduous_mix"
+            },
+            {
+                "compose": "tradhojd_3_2_over_15_m"
+            },
+            {
+                "compose": "tradhojd_3_2_under_15_m"
+            },
+            {
+                "compose": "latitude_north_of_7000000"
+            },
+            {
+                "compose": "latitude_south_of_6590000"
+            }
+        ]
     }
 }
