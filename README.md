@@ -127,7 +127,7 @@ Now we use the trained model to make predictions for all tiles for which we down
 python make_predictions.py \
 --geodata_folder tutorial/precompiled/prediction_geodata/download_folder \
 --output_path tutorial/model_predictions_tutorial \
---trained_model tutorial/precompiled/best_model/100,50,100/best_model.pth \
+--trained_model tutorial/precompiled/best_model/best_model.pth \
 --crop_corners 20 \
 --apply_mask \
 --threads 10
