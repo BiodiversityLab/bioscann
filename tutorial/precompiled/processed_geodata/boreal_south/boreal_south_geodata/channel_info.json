@@ -1,0 +1,38 @@
+{
+    "treeheight_2024": [
+        128,
+        128
+    ],
+    "soil_moisture": [
+        128,
+        128
+    ],
+    "elevation_gradient_2024": [
+        128,
+        128
+    ],
+    "ditches": [
+        128,
+        128
+    ],
+    "peat_depth": [
+        128,
+        128
+    ],
+    "soil_type": [
+        128,
+        128
+    ],
+    "biomass_2024": [
+        128,
+        128
+    ],
+    "leaves_present_2024": [
+        128,
+        128
+    ],
+    "satellite": [
+        128,
+        128
+    ]
+}
