@@ -9,10 +9,10 @@ This includes the following main steps:
 - predictions of conservation value
 
 ## Download project from GitHub
-Download the `bioscann` GitHub repo and navigate into the project folder using your command line. For the installation in the next step you need to have the installation manager `conda` installed (download [here](https://docs.anaconda.com/miniconda/)).
+Download the `bioscann` GitHub repo (download [here](https://github.com/BiodiversityLab/bioscann)) and navigate into the project folder using your command line. For the installation in the next step you need to have the installation manager `conda` installed (download [here](https://docs.anaconda.com/miniconda/)).
 
 ## Installation
-You install the software as a conda package by executing the command below in your command line. Before running the command, make sure you are located in the downloaded `bioscann` GitHub directory. For this to work the installation file `environment.yml` needs to be present in your directory.
+You can install the software as a conda package by executing the command below in your command line. Before running the command, make sure you are located in the downloaded `bioscann` GitHub directory. For this to work the installation file `environment.yml` needs to be present in your directory.
 
 **Install bioscann (tested on MacOS and Linux):**
 ```commandline
