@@ -46,8 +46,8 @@ To download the remote-sensing derived environmental features for each instance 
 
 For this script to run, it requires as input the folder with the cropped instances resulting from the previous command.
 However, the upcoming data download step will take a long time to finish for all instances compiled in the previous step.
-We therefore recommend to instead download the `precompiled.zip` folder from the supplementary data accompanying the manuscript ([figshare-link](https://figshare.com/s/637de046184aaee0b599)), which contains a reduced selection of instances of our selected bioregion. We recommend to place and unzip the downloaded `precompiled.zip` folder in your `./tutorial` working folder.
-The file paths provided in this tutorial assume this file-structure, you will have to adjust them accordingly in case you want to use your own files.
+We therefore recommend to instead download the reduced selection of instances, provided in the `tutorial/precompiled` folder.
+The input-data file paths provided in this tutorial will usually point to the files in this `tutorial/precompiled` folder, you will have to adjust them accordingly in case you want to use your own files.
 
 **!Note!:** The set of environmental features in this tutorial differs slightly from the set used in the original implementation presented in the manuscript, due to updates on the data server. Instead of 11 channels in the original implementation, the data used in this tutorial consist of only 9 channels.
 
@@ -72,10 +72,10 @@ To explore the downloaded tiff files resulting from the command above, check out
 ## Train model
 The next step is training the deep-learning model, which can be time-intensive depending on the size of the input data.
 For the entire southern boreal dataset this will likely take more than 1 day, but it can be spead up considerably when running on a machine that can utilize GPU resources (requires manual installation and GPU-mounting of the pytorch machine learning library, not covered in this tutorial).
-You can start training your model using the reduced input data provided in the `precompiled.zip` folder.
-However, since this model won't train very well on such little input data, we recommend to use one of our provided trained models (also found in `precompiled.zip`) for the following steps.
+You can try out training your model using the reduced input data provided at `tutorial/precompiled/processed_geodata`.
+However, since this model won't train very well on such little input data, we recommend to use one of our provided trained models (found in `tutorial/precompiled/best_model`) for the following steps.
 
-**! Note !:** We are using the reduced precompiled data ([figshare-link](https://figshare.com/s/637de046184aaee0b599)) as input here to speed up model training. In case you want to use your own compiled large dataset, change the input paths for `--dataset`, `--validation`, and `--test_dataset` accordingly.
+**! Note !:** We are using the reduced precompiled data (`tutorial/precompiled/processed_geodata`) as input here to speed up model training. In case you want to use your own compiled large dataset, change the input paths for `--dataset`, `--validation`, and `--test_dataset` accordingly.
 
 ```commandline
 python train_model.py \
@@ -121,7 +121,7 @@ python download_prediction_geodata.py \
 ## Make predictions with trained model
 Now we use the trained model to make predictions for all tiles for which we downloaded the environmental features in the previous step. Since we applied a 200 m buffer to each tile, we need to remove this buffer from the predictions to convert each tile back to the target-tile-size. Therefore we apply the flag `--crop_corners 20`, which removes 20 pixels (at 10 m per pixel = 200 m) around each prediction image.
 
-**! Note !:** If you trained your own model based on the environmental features you compiled during this tutorial, your model will be trained on 9 environmental data channels (see explanation above). If you download our pre-trained model presented in the manuscript, you will be working with a model that is trained on 11 environmental data channels, instead. In the latter case you won't be able to use the pre-trained model to make predictions for the data you downloaded in the previous step, because the number of channels does not match what the model has been trained on. In the command below we use the precompiled data and pre-trained model ([figshare-link](https://figshare.com/s/637de046184aaee0b599)).
+**! Note !:** If you trained your own model based on the environmental features you compiled during this tutorial, your model will be trained on 9 environmental data channels (see explanation above). If you instead use our pre-trained model, presented in the manuscript, you will be working with a model that is trained on 11 environmental data channels, instead. In the latter case, you won't be able to use our pre-trained model to make predictions for the data you downloaded in the previous step, because the number of channels does not match what the model has been trained on (this discrepancy is due to changes on the data-server, with certain features being discontinued). In the command below we use the precompiled prediction data and our pre-trained model. Both can be found in the `tutorial/precompiled` folder.
 
 ```commandline
 python make_predictions.py \
