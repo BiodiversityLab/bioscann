@@ -1,7 +1,7 @@
 # BIOSCANN
 **BIOSCANN**: **BIO**diversity **S**egmentation and **C**lassification with **A**rtificial **N**eural **N**etworks
 ____
-<div style="display: flex; justify-content: space-around;">
+<div style="display: flex; justify-content: center; gap: 60px;">
     <img src="img/Uppsala_universitet_logo.jpg" alt="Image 2" width="50" />
     <img src="img/SciLifeLab_Logotype_Green_POS.png" alt="Image 2" width="200" />
     <img src="img/2560px-Skogsstyrelsen_logo.svg.png" alt="Image 1" width="200" />
