@@ -65,9 +65,9 @@ python extract_geo_data.py \
     --threads 10
 ```
 
-To learn more about the api download of environmental features, check out the jupyter notebook in this repository [./download_geodata_api.ipynb](./download_geodata_api.ipynb).
+To learn more about the api download of environmental features, check out the jupyter notebook in this repository [download_geodata_api.ipynb](https://github.com/BiodiversityLab/bioscann/blob/main/download_geodata_api.ipynb).
 
-To explore the downloaded tiff files resulting from the command above, check out the notebook [./display_downloaded_tiff.ipynb](./display_downloaded_tiff.ipynb).
+To explore the downloaded tiff files resulting from the command above, check out the notebook [display_downloaded_tiff.ipynb](https://github.com/BiodiversityLab/bioscann/blob/main/display_downloaded_tiff.ipynb).
 
 ## Train model
 The next step is training the deep-learning model, which can be time-intensive depending on the size of the input data.
