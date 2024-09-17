@@ -1,5 +1,6 @@
 # BIOSCANN
 **BIOSCANN**: **BIO**diversity **S**egmentation and **C**lassification with **A**rtificial **N**eural **N**etworks
+
 ____
 <div style="display: flex; justify-content: center; gap: 60px;">
     <img src="img/Uppsala_universitet_logo.jpg" alt="Image 2" width="50" />
@@ -10,6 +11,8 @@ ____
 _A collaboration between Uppsala University and The Swedish Forest Agency, funded by the Swedish Government and the SciLifeLab and Wallenberg Data-Driven Life Science (DDLS) program._
 
 ____
+
+A BIOSCANN preprint is now available: https://doi.org/10.21203/rs.3.rs-4734879/v1
 
 This tutorial shows the basic commands for running the `bioscann` pipeline to make predictions of conservation value across national scale (in this case applied to forests in Sweden). 
 This includes the following main steps:
