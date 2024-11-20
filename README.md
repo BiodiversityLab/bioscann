@@ -14,6 +14,8 @@ ____
 
 A BIOSCANN preprint is now available: https://doi.org/10.21203/rs.3.rs-4734879/v1
 
+Check out the interactive data product for all of Sweden: https://gee-hcvf-andermann.projects.earthengine.app/view/hcvf-viewer
+
 This tutorial shows the basic commands for running the `bioscann` pipeline to make predictions of conservation value across national scale (in this case applied to forests in Sweden). 
 This includes the following main steps:
 - installation of `bioscann` (installation tested on MacOS)
