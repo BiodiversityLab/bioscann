@@ -84,6 +84,54 @@ def rescale_sattelite_img(image_array):
     new_image_array = min_max_scaler(image_array,min_value,max_value)
     return new_image_array
 
+def rescale_gee_ndvi(image_array):
+    min_value = -1
+    max_value = 1
+    new_image_array = min_max_scaler(image_array,min_value,max_value)
+    return new_image_array
+
+def rescale_gee_temperature(image_array):
+    min_value = -290
+    max_value = 320
+    new_image_array = min_max_scaler(image_array,min_value,max_value)
+    return new_image_array
+
+def rescale_gee_temperature_seasonality(image_array):
+    min_value = 61
+    max_value = 22721
+    new_image_array = min_max_scaler(image_array,min_value,max_value)
+    return new_image_array
+
+def rescale_gee_precipitation(image_array):
+    min_value = 0
+    max_value = 11401
+    new_image_array = min_max_scaler(image_array,min_value,max_value)
+    return new_image_array
+
+def rescale_gee_precipitation_seasonality(image_array):
+    min_value = 0
+    max_value = 265
+    new_image_array = min_max_scaler(image_array,min_value,max_value)
+    return new_image_array
+
+def rescale_gee_hii(image_array):
+    min_value = 0
+    max_value = 5000
+    new_image_array = min_max_scaler(image_array,min_value,max_value)
+    return new_image_array
+
+def rescale_gee_elevation(image_array):
+    min_value = -50
+    max_value = 2100
+    new_image_array = min_max_scaler(image_array,min_value,max_value)
+    return new_image_array
+
+def rescale_depth_to_water(image_array):
+    min_value = 0
+    max_value = 255
+    new_image_array = min_max_scaler(image_array,min_value,max_value)
+    return new_image_array
+
 # def normalization_skogligagrunddata_2_0(image_array):
 #     min_value = [0, 0, 0, 0, 0, 0, 0, 14393]
 #     max_value = [3906, 501, 139, 115, 1246, 500, 100, 18318]

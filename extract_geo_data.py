@@ -28,6 +28,9 @@ import pdb
 import logging
 import re
 import concurrent.futures
+import ee
+import geemap
+
 
 logging.basicConfig(level='INFO')
 log = logging.getLogger()
@@ -114,8 +117,12 @@ def create_annotation_and_mask_image(training_dataset_output_path, training_data
 
     return center_polygons_to_remove
 
-def do_work(extent_name,json_data,opt,train_annotation_path,testset_instances_dir,validationset_instances_dir,test_features_path,test_annotation_path,selected_test_apis,testdata_path,json_test_data,validation_features_path,validation_annotation_path,train_features_path,selected_apis):
+def do_work(extent_name,json_data,opt,train_annotation_path,testset_instances_dir,validationset_instances_dir,test_features_path,test_annotation_path,selected_test_apis,testdata_path,json_test_data,validation_features_path,validation_annotation_path,train_features_path,selected_apis,gee_account, gee_json_path):
     np.random.seed(1)
+    # if any(s.startswith('gee_') for s in selected_apis):
+    #     log.info('GEE features detected. Logging into GEE api server.')
+    #     ra.GEE_initialize(gee_account, gee_json_path)
+
     log.info('Creating data from extent '+ extent_name)
     # this is the file containing the selected squares, stored as polygons
     extent_name = extent_name.replace('\\','/')
@@ -165,7 +172,7 @@ def do_work(extent_name,json_data,opt,train_annotation_path,testset_instances_di
             target_folder_annotations = train_annotation_path
 
         mask_image = np.ones((int(opt.img_size), int(opt.img_size)))
-        mask_image = mi.get_mask_image(json_data[opt.configuration]['prediction_masks'], mask_image, center_polygon, target_folder_features, username=opt.username, password=opt.password, img_size=int(opt.img_size))
+        mask_image = mi.get_mask_image(json_data[opt.configuration]['prediction_masks'], mask_image, center_polygon, target_folder_features, username=opt.username, password=opt.password, gee_account = opt.gee_account, gee_json_path = opt.gee_json_path, img_size=int(opt.img_size))
         if mask_image.sum()==0:
             continue
         
@@ -173,13 +180,13 @@ def do_work(extent_name,json_data,opt,train_annotation_path,testset_instances_di
             #creating test data
             if opt.test_configuration:
                 while True:
-                    test_channels = ir.get_channels(center_polygon, "", img_size=int(opt.img_size), selected_apis=selected_test_apis, apis=ra.apis, username=opt.username, password=opt.password, meters_per_pixel=int(opt.meters_per_pixel))
+                    test_channels = ir.get_channels(center_polygon, "", img_size=int(opt.img_size), selected_apis=selected_test_apis, apis=ra.apis, username=opt.username, password=opt.password, gee_account=opt.gee_account, gee_json_path=opt.gee_json_path,meters_per_pixel=int(opt.meters_per_pixel))
                     success, _ = td.compose_testdata(testdata_path, test_channels, test_channels[0],img_size=int(opt.img_size), test_config=json_test_data[opt.test_configuration], center_polygon=center_polygon.iloc[0])
                     if success:
                         break
 
         while True:
-            channels = ir.get_channels(center_polygon, "", img_size=int(opt.img_size), selected_apis=selected_apis, apis=ra.apis, username=opt.username, password=opt.password, meters_per_pixel=int(opt.meters_per_pixel))
+            channels = ir.get_channels(center_polygon, "", img_size=int(opt.img_size), selected_apis=selected_apis, apis=ra.apis, username=opt.username, password=opt.password, gee_account=opt.gee_account, gee_json_path=opt.gee_json_path, meters_per_pixel=int(opt.meters_per_pixel))
             
             if opt.lonlat_features:
                 channels = append_lon_lat_arrays_to_channels(center_polygon, channels)
@@ -197,6 +204,8 @@ def main(opt):
     selected_apis = []
     selected_test_apis = []
 
+    gee_account = opt.gee_account
+    gee_json_path = opt.gee_json_path
 
     log.info('Using config' + opt.configuration)
     with open('utils/configurations.json',encoding='utf-8') as f:
@@ -209,7 +218,7 @@ def main(opt):
             selected_apis.append('ai_image_server_'+api)
         else:
             selected_apis.append(api)
-    print(selected_apis)
+    # print(selected_apis)
     if opt.polygon_ids != []: log.info('Using polygons:')
     polygon_ids = []
     for c in opt.polygon_ids:
@@ -263,7 +272,7 @@ def main(opt):
                     executor.submit(do_work, extents_name, json_data, opt, train_annotation_path, testset_instances_dir,
                                     validationset_instances_dir, test_features_path, test_annotation_path,
                                     selected_test_apis, testdata_path, json_test_data, validation_features_path,
-                                    validation_annotation_path, train_features_path, selected_apis) for
+                                    validation_annotation_path, train_features_path, selected_apis,gee_account,gee_json_path) for
                     extents_index, extents_name in enumerate(extents)]
         else:
             print('Running on one core')
@@ -271,8 +280,7 @@ def main(opt):
                 do_work(extents_name, json_data, opt, train_annotation_path, testset_instances_dir,
                         validationset_instances_dir, test_features_path, test_annotation_path, selected_test_apis,
                         testdata_path, json_test_data, validation_features_path, validation_annotation_path,
-                        train_features_path,
-                        selected_apis)  # for extents_index, extent_name in enumerate(extents) if extents_index>=0 ]
+                        train_features_path, selected_apis,gee_account,gee_json_path)  # for extents_index, extent_name in enumerate(extents) if extents_index>=0 ]
 
     # extents = glob.glob(os.path.join(opt.extents,"[!original_]*.gpkg"))
     # def sort_key(name):
@@ -324,7 +332,7 @@ def save_apis_channel_data(extent_name, selected_apis, meters_per_pixel, output_
     center_polygon = geopd.GeoDataFrame(points_within_image_df)
     #print(center_polygon)
 
-    apis_channel_info = ir.get_channel_info(center_polygon, img_size=int(opt.img_size), selected_apis=selected_apis, apis=ra.apis, username=opt.username, password=opt.password, meters_per_pixel=meters_per_pixel)
+    apis_channel_info = ir.get_channel_info(center_polygon, img_size=int(opt.img_size), selected_apis=selected_apis, apis=ra.apis, username=opt.username, password=opt.password, meters_per_pixel=meters_per_pixel, gee_account = opt.gee_account,gee_json_path = opt.gee_json_path)
 
     # Save information to json
     with open(output_file, "w") as f:
@@ -354,6 +362,8 @@ if __name__=='__main__':
     parser.add_argument('--target_server', action='store', default='https://geodata.skogsstyrelsen.se/arcgis/rest/')
     parser.add_argument('--username', action='store', default='')
     parser.add_argument('--password', action='store', default='')
+    parser.add_argument('--gee_account', action='store', default='')
+    parser.add_argument('--gee_json_path', action='store', default='')
     opt = parser.parse_args()
 
     main(opt)
@@ -371,7 +381,7 @@ if __name__=='__main__':
 #     testset_size=0.2,
 #     validation_size=0.2,
 #     test_area=[389000, 6752000, 389000, 6757000],
-#     configuration="version_public_sat_2024",
+#     configuration="version_public_gee_2025",
 #     window_coordinates="tutorial/precompiled/processed_geodata/boreal_south/cropped_windows",
 #     polygons_path='geopackage',
 #     lonlat_features=False,
@@ -382,5 +392,7 @@ if __name__=='__main__':
 #     logging_off=True,
 #     target_server='https://geodata.skogsstyrelsen.se/arcgis/rest/',
 #     username='xxxx',
-#     password='xxxx'
+#     password='xxxx',
+#     gee_account = 'tobiasandermann@thematic-keel-330810.iam.gserviceaccount.com',
+#     gee_json_path = 'data/api_info/thematic-keel-330810-2325e8051ec6.json'
 # )

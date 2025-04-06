@@ -6,9 +6,11 @@ import requests
 import logging
 import json
 import string
-
+import ee
+import geemap
 from osgeo import gdal
 import osgeo.osr as osr
+import utils.RestAPIs as ra
 
 import time
 
@@ -25,7 +27,7 @@ def get_image_coordinates( geodf_separata_polygoner, offset=150):
     return coordinates
     
     
-def get_channels(center_polygon,training_dataset_path,img_size, selected_apis, apis, username, password, meters_per_pixel=10, get_image_coord=True):
+def get_channels(center_polygon,training_dataset_path,img_size, selected_apis, apis, username, password, gee_account='', gee_json_path='', meters_per_pixel=10, get_image_coord=True):
         #image_size = 512
     offset = img_size / 2
     #meters_per_pixel = 10
@@ -34,11 +36,17 @@ def get_channels(center_polygon,training_dataset_path,img_size, selected_apis, a
     if get_image_coord: 
         image_coordinates = get_image_coordinates(center_polygon,offset)
         for selected_api in selected_apis:
-            channels.append(get_image(center_polygon, image_coordinates, 0, img_size, selected_api, apis, username, password))
+            if selected_api.startswith('gee_'):
+                channels.append(get_image_gee(center_polygon, image_coordinates,0, img_size,meters_per_pixel,selected_api,apis,gee_account,gee_json_path))
+            else:
+                channels.append(get_image(center_polygon, image_coordinates, 0, img_size, selected_api, apis, username, password))
     else:
         image_coordinates = center_polygon
         for selected_api in selected_apis:
-            img_data = get_image_no_polygon(training_dataset_path, image_coordinates, 0, img_size, selected_api, apis, username, password)
+            if selected_api.startswith('gee-'):
+                img_data = get_image_no_polygon_gee()
+            else:
+                img_data = get_image_no_polygon(training_dataset_path, image_coordinates, 0, img_size, selected_api, apis, username, password)
             # if img_data == None:
             #     channels = [None]*len(selected_apis)
             #     return channels
@@ -47,7 +55,7 @@ def get_channels(center_polygon,training_dataset_path,img_size, selected_apis, a
     return channels
 
 
-def get_channel_info(center_polygon, img_size, selected_apis, apis, username, password, meters_per_pixel:int) -> dict:
+def get_channel_info(center_polygon, img_size, selected_apis, apis, username, password, meters_per_pixel:int, gee_account='', gee_json_path='') -> dict:
     '''Get the channel info for each selected api into a json'''
     apis_channel_info = {}
 
@@ -56,10 +64,14 @@ def get_channel_info(center_polygon, img_size, selected_apis, apis, username, pa
 
     # Fetch information from each selected api
     for selected_api in selected_apis:
-        image_path = get_image(center_polygon, image_coordinates, 0, img_size, selected_api, apis, username, password)
-        image = imread(image_path)
-        apis_channel_info[selected_api] = image.shape
-
+        if selected_api.startswith('gee_'):
+            image_path = get_image_gee(center_polygon,image_coordinates,0, img_size,meters_per_pixel,selected_api,apis,gee_account, gee_json_path)
+            image = imread(image_path)
+            apis_channel_info[selected_api] = image.shape
+        else:
+            image_path = get_image(center_polygon, image_coordinates, 0, img_size, selected_api, apis, username, password)
+            image = imread(image_path)
+            apis_channel_info[selected_api] = image.shape
     return apis_channel_info
 
 
@@ -125,6 +137,7 @@ def get_image(poly, image_coordinates, polygon_index, img_size,rest_api, apis, u
     image_name = os.path.join('feature_layers',image_name)
     if not os.path.isfile(image_name):
         params = apis[rest_api]['params'](image_coordinates[0], image_size=img_size)
+        # print(rest_api,apis[rest_api])
         server_url = apis[rest_api]['url']()
         try_get_image_attempt = 0
         while True:
@@ -145,6 +158,21 @@ def get_image(poly, image_coordinates, polygon_index, img_size,rest_api, apis, u
                 else:
                     pass
         print(try_get_image_attempt)
+    return image_name
+
+
+def get_image_gee(poly, image_coordinates, polygon_index, img_size, meters_per_pixel, rest_api, apis,gee_account, gee_json_path,crs='EPSG:3006'):
+    image_name = "id-{}-{}-{}-{}.tif".format(poly.iloc[0]['TARGET_FID'],polygon_index,rest_api,image_coordinates[0])
+    image_name = image_name.replace('\'','').replace('"','').replace('[','').replace(']','').replace(', ','-')
+    image_name = os.path.join('feature_layers',image_name)
+    if not os.path.isfile(image_name):
+        params = apis[rest_api]['params'](image_coordinates[0], image_size=img_size)
+        target_channel, coordinates_list, image_size, start_date, end_date = params
+        ra.GEE_initialize(gee_account, gee_json_path)
+        gee_geometry = ee.Geometry.Rectangle(coordinates_list, proj=crs, geodesic=False)
+        target_function = apis[rest_api]['function']
+        target_function(target_channel,image_name,gee_geometry,meters_per_pixel,crs,start_date,end_date)
+        #TODO: Fix this function and also get_image_no_polygon_gee()
     return image_name
 
 
@@ -175,6 +203,13 @@ def get_image_no_polygon(dataset_path, image_coordinates, polygon_index, img_siz
                     pass
         #print(try_get_image_attempt)
     return image_name
+
+
+def get_image_no_polygon_gee(dataset_path, image_coordinates, polygon_index, img_size,rest_api, apis):
+    image_name = "{}-{}.tiff".format(rest_api,image_coordinates)
+    image_name = image_name.replace('\'','').replace('"','').replace('[','').replace(']','').replace(', ','-')
+    image_name = os.path.join(dataset_path,image_name)
+    return 0
 
 
 def write_geotif_at_location(ref_image_filepath, out_image_filepath, list_of_numpy_arr):

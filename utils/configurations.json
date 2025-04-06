@@ -646,6 +646,54 @@
         ],
         "polygon_filtering_method": "version_2"
     },
+    "version_public_gee_2025": {
+        "apis": [
+            "treeheight",
+            "biomass",
+            "elevation_shading",
+            "elevation_gradient",
+            "soil_moisture",
+            "peat_depth",
+            "soil_type",
+            "gee_ndvi",
+            "gee_temperature",
+            "gee_temperature_seasonality",
+            "gee_precipitation",
+            "gee_precipitation_seasonality",
+            "gee_hii",
+            "gee_elevation"
+        ],
+        "prediction_masks": [
+            {
+                "api": "land_cover_types",
+                "channels": [
+                    0
+                ],
+                "mask_values": [
+                    [
+                        111,
+                        112,
+                        113,
+                        114,
+                        115,
+                        116,
+                        117,
+                        118,
+                        121,
+                        122,
+                        123,
+                        124,
+                        125,
+                        126,
+                        127,
+                        128
+                    ]
+                ],
+                "mask_values_exclude": []
+            }
+        ],
+        "polygon_filtering_method": "version_2"
+    },
     "template": {
         "apis": [
             "selection of ",

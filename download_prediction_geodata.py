@@ -71,14 +71,16 @@ def process_tile(args):
     image_coordinates = [y, x, y + opt.offset, x + opt.offset]
     channels = ir.get_channels(image_coordinates, opt.download_folder, img_size=opt.image_size,
                                selected_apis=opt.selected_apis, apis=ra.apis, username=opt.username,
-                               password=opt.password, meters_per_pixel=int(opt.meters_per_pixel),
-                               get_image_coord=False)
+                               password=opt.password, gee_account=opt.gee_account, gee_json_path=opt.gee_json_path,
+                               meters_per_pixel=int(opt.meters_per_pixel), get_image_coord=False)
     mi.download_landcover_channel(opt.json_data[opt.configuration]['prediction_masks'],
                                   image_coordinates,
                                   opt.download_folder,
                                   opt.image_size,
                                   opt.username,
-                                  opt.password)
+                                  opt.password,
+                                  opt.gee_account,
+                                  opt.gee_json_path)
     # #print(channels)
     # if (len(channels) > 0):
     #     if channels[0] == None:

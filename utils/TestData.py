@@ -6,7 +6,7 @@ import pdb
 
 
 def compose_testdata(output_path, channels, ref_image, img_size, test_config, center_polygon):
-    print("compose testada")
+    print("compose testdata")
     images = []
     image_paths = []
     try:
@@ -14,8 +14,7 @@ def compose_testdata(output_path, channels, ref_image, img_size, test_config, ce
             #pdb.set_trace()
             mask_image = np.ones((img_size, img_size))
             mask_image = tdc.compose_method[feature_composition['compose']](channels, mask_image)
-        # pdb.set_trace()
-            #TODO: save image with suitable name
+            # pdb.set_trace()
             #pdb.set_trace()
             image_name = os.path.join(output_path,'{}-{}.tiff'.format(center_polygon['TARGET_FID'],feature_composition['compose']))
             image = np.array([mask_image])

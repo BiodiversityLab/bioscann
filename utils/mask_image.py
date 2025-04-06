@@ -22,14 +22,14 @@ def mask_with_annotation(chan, mask_image):
     return chan * mask_image
 
 
-def get_mask_image(indata_mask_configurations, mask_image, center_polygon, indata_path, img_size, username, password, get_image_coord=True):
+def get_mask_image(indata_mask_configurations, mask_image, center_polygon, indata_path, img_size, username, password, gee_account, gee_json_path, get_image_coord=True):
     for feature_layer_config in indata_mask_configurations:
-        feature_layer = ir.get_channels(center_polygon, indata_path, img_size, selected_apis=[feature_layer_config['api']], apis=ra.apis, username=username, password=password, get_image_coord=get_image_coord)
+        feature_layer = ir.get_channels(center_polygon, indata_path, img_size, selected_apis=[feature_layer_config['api']], apis=ra.apis, username=username, password=password,gee_account=gee_account, gee_json_path=gee_json_path, get_image_coord=get_image_coord)
         feature_layer = imread(feature_layer[0])
         mask_image = create_filter_mask(feature_layer, mask_image, feature_layer_config)
     return mask_image
 
-def download_landcover_channel(indata_mask_configurations, image_coordinates, indata_path, img_size, username, password):
+def download_landcover_channel(indata_mask_configurations, image_coordinates, indata_path, img_size, username, password, gee_account, gee_json_path):
     for feature_layer_config in indata_mask_configurations:
-        feature_layer = ir.get_channels(image_coordinates, indata_path, img_size, selected_apis=[feature_layer_config['api']], apis=ra.apis, username=username, password=password, get_image_coord=False)
+        feature_layer = ir.get_channels(image_coordinates, indata_path, img_size, selected_apis=[feature_layer_config['api']], apis=ra.apis, username=username, password=password, gee_account=gee_account, gee_json_path=gee_json_path, get_image_coord=False)
     return feature_layer
