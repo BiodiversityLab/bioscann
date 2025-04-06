@@ -172,7 +172,6 @@ def get_image_gee(poly, image_coordinates, polygon_index, img_size, meters_per_p
         gee_geometry = ee.Geometry.Rectangle(coordinates_list, proj=crs, geodesic=False)
         target_function = apis[rest_api]['function']
         target_function(target_channel,image_name,gee_geometry,meters_per_pixel,crs,start_date,end_date)
-        #TODO: Fix this function and also get_image_no_polygon_gee()
     return image_name
 
 

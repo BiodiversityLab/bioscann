@@ -187,7 +187,7 @@ def do_work(extent_name,json_data,opt,train_annotation_path,testset_instances_di
 
         while True:
             channels = ir.get_channels(center_polygon, "", img_size=int(opt.img_size), selected_apis=selected_apis, apis=ra.apis, username=opt.username, password=opt.password, gee_account=opt.gee_account, gee_json_path=opt.gee_json_path, meters_per_pixel=int(opt.meters_per_pixel))
-            
+
             if opt.lonlat_features:
                 channels = append_lon_lat_arrays_to_channels(center_polygon, channels)
 
@@ -382,7 +382,7 @@ if __name__=='__main__':
 #     validation_size=0.2,
 #     test_area=[389000, 6752000, 389000, 6757000],
 #     configuration="version_public_gee_2025",
-#     window_coordinates="tutorial/precompiled/processed_geodata/boreal_south/cropped_windows",
+#     window_coordinates="data/processed_geodata/continental/cropped_windows",
 #     polygons_path='geopackage',
 #     lonlat_features=False,
 #     meters_per_pixel=10,
