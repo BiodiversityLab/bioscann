@@ -3,6 +3,7 @@ import os
 import geopandas as geopd
 import numpy as np
 import pandas as pd
+from pandas.core.dtypes.missing import isna
 from sklearn.cluster import MiniBatchKMeans, AgglomerativeClustering
 import errno
 import time
@@ -164,23 +165,29 @@ def point_clustering_to_boxes(searchstring, output_path, im_size=1280, no_overla
                 indexer = group_df.sindex
                 overlaps = []
                 for cell in grid:
-                    overlaps = geopd.sjoin(cell, group_df, op='intersects')
+                    overlaps = geopd.sjoin(cell, group_df, predicate='intersects')
                     if not overlaps.empty:
                         intersecting_cells.append(cell)
                 end_time = time.time()
                 elapsed_time = end_time - start_time
-                print(f"Tid som tagits: {elapsed_time:.6f} sekunder")
+                print(f"Elapsed time: {elapsed_time:.6f} seconds")
                 gdf_bboxes = geopd.GeoDataFrame(pd.concat(intersecting_cells), crs='EPSG:3006')
                 gdf_bboxes.to_file(f"{output_path}/bboxes_{name}.gpkg", driver="GPKG")
                 group_df.to_file(f"{output_path}/original_bboxes_{name}.gpkg", driver="GPKG")
 
 
-def coarse_clustering_of_points(searchstring,out_folder,max_n=1500):
+def coarse_clustering_of_points(searchstring,out_folder,exclude_n2k=False,max_n=1500):
     ensure_dir(out_folder)
     # Generate sample data
-    rows=1500
+    rows=max_n
     for file in glob.glob(searchstring):
         geo_df = geopd.GeoDataFrame.from_file(file, geometry='geometry',crs="EPSG:3006")
+        if not exclude_n2k:
+            # remove N2K polygons that are not forest
+            geo_df = geo_df[geo_df['NATURTYPKO'].apply(lambda x: str(x).startswith('9') if not isna(x) else True)]
+            # remove N2K polygons of low naturalness
+            allowed_values = ["1 - Fullgod Natura-naturtyp", "2 - Icke fullgod Natura-naturtyp"]
+            geo_df = geo_df[pd.isna(geo_df['NATURTYPSS']) | geo_df['NATURTYPSS'].isin(allowed_values)]
         pnt_df = geopd.GeoDataFrame(geo_df.geometry.centroid,columns=['geometry'])
        # pdb.set_trace()
         pnt_df['x'] = pnt_df.geometry.x
@@ -193,7 +200,7 @@ def coarse_clustering_of_points(searchstring,out_folder,max_n=1500):
         while max_count>max_n:
           #  pdb.set_trace()
             print(n_cluster)
-            kmeans = MiniBatchKMeans(n_clusters=n_cluster,random_state=0,batch_size=1024,max_iter=10).fit(X)
+            kmeans = MiniBatchKMeans(n_clusters=n_cluster,random_state=0,batch_size=1024,max_iter=10,n_init=3).fit(X)
             cluster_ids = kmeans.predict(X)
            # pdb.set_trace()
             geo_df['cluster'] = cluster_ids

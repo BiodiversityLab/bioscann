@@ -382,7 +382,7 @@ if __name__=='__main__':
 #     validation_size=0.2,
 #     test_area=[389000, 6752000, 389000, 6757000],
 #     configuration="version_public_gee_2025",
-#     window_coordinates="data/processed_geodata/continental/cropped_windows",
+#     window_coordinates="data/processed_geodata/alpine/cropped_windows",
 #     polygons_path='geopackage',
 #     lonlat_features=False,
 #     meters_per_pixel=10,
@@ -391,8 +391,8 @@ if __name__=='__main__':
 #     ai_image_server=False,
 #     logging_off=True,
 #     target_server='https://geodata.skogsstyrelsen.se/arcgis/rest/',
-#     username='xxxx',
-#     password='xxxx',
-#     gee_account = 'tobiasandermann@thematic-keel-330810.iam.gserviceaccount.com',
-#     gee_json_path = 'data/api_info/thematic-keel-330810-2325e8051ec6.json'
+#     username='',
+#     password='',
+#     gee_account = '',
+#     gee_json_path = ''
 # )

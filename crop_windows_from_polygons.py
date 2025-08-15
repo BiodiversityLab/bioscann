@@ -37,6 +37,10 @@ def main(opt):
             if filename.endswith('.gpkg'):
                 print(filename)
                 files.append(os.path.join(root, filename))
+    if opt.exclude_n2k:
+        files = [f for f in files if '/natura_2000/' not in f]
+    else:
+        print("Including Natura 2000 polygons.")
     combined = []
     for f in files:
         gpkg = cp.read_gpkg(f,row=None)
@@ -56,10 +60,9 @@ def main(opt):
 
     max_n_in_cluster = 1000 
     #Gor forst en grov clustringsalgorithm pa alla polygoner
-    coarse_clustering_of_points(combined_filename, opt.output_path, max_n_in_cluster)
+    coarse_clustering_of_points(combined_filename, opt.output_path, opt.exclude_n2k,  max_n_in_cluster)
 
     #Gor en finare uppdelning utifran den grova indelningen
-    print(os.path.join(opt.output_path,'*coarse.gpkg'))
     point_clustering_to_boxes(os.path.join(opt.output_path,'*_coarse.gpkg'), opt.output_path, im_size=int(opt.extent_size), no_overlap=no_overlap, write_eval=False)
 
 
@@ -70,6 +73,8 @@ if __name__=='__main__':
     parser.add_argument('--output_path', action='store', default='geopackage')
     parser.add_argument('--extent_size', action='store', default='1280')
     parser.add_argument('--no_overlap', action='store_true', help='set no overlap if no extent is allowed to overlap')
+    parser.add_argument('--exclude_n2k', action='store_true', help='exclude Natura 2000 areas')
+
     opt = parser.parse_args()
 
     main(opt)
@@ -77,4 +82,4 @@ if __name__=='__main__':
 # # below code is for trouble-shooting purposes only:
 # from types import SimpleNamespace
 # # Create an opt object with the desired attributes
-# opt = SimpleNamespace(input_path='data/polygons/boreal_east', output_path='geopackage', extent_size='1280', no_overlap=True)
+# opt = SimpleNamespace(input_path='data/polygons/alpine', output_path='geopackage', extent_size='1280', no_overlap=True, exclude_n2k=False)

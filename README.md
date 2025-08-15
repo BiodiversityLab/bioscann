@@ -47,7 +47,7 @@ From here on out, for any bioscann command you run, make sure you are connected 
 
 
 ## Convert polygon data into individual instances
-In this step we create the cropping windows for the individual instances that we use for model training and evaluation. For simplicity we show the `bioscann` wokflow for only one of the five separate bioregional subsets of the data, namely the southern boreal region.
+In this step we create the cropping windows for the individual instances that we use for model training and evaluation. For simplicity we show the `bioscann` workflow for only one of the five separate bioregional subsets of the data, namely the southern boreal region.
 
 ```commandline
 python crop_windows_from_polygons.py \
